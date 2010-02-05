@@ -1,0 +1,46 @@
+How to install DB2 on Ubuntu and the IBM_DB python egg.
+
+Download DB2 as an Ubuntu .deb file here for your ARCH
+
+ftp.software.ibm.com/software/data/db2/express/latest_debs
+
+Run: sudo gdebi-gtk db2exc_*.deb
+
+This will bring up the synaptic package manager to install DB2
+
+Once complete you’ll have more users in /home, you’ll now need to export these locations to your ENV
+(Paste these as they appear)
+
+$ . /home/db2inst1/sqllib/db2profile
+$ export IBM_DB_DIR=/home/db2inst1/sqllib
+$ export IBM_DB_LIB=/home/db2inst1/sqllib/lib
+(Note: Once you close your terminal, the last two export commands will no longer be in your session, to keep this persistent, paste the export lines into your .bashrc.
+
+Now your DB2 libraries are setup, if you wish to continue installing locally see: http://tldp.org/HOWTO/DB2-HOWTO/ubuntu704.html
+However, if you only wish to connect to a remote database you may skip the above step.
+
+Make sure you have python-dev installed:
+
+sudo apt-get install python-dev
+
+Make sure you have python setuptools installed (so we can easily install ibm_db for python)
+
+sudo apt-get install python-setuptools
+
+Install ibm_db: ( egg/docs/source also located here if you don’t want to use setuptools: http://code.google.com/p/ibm-db/ )
+
+sudo easy_install ibm_db
+
+Ignore the warnings when you install, this is normal. If you have warnings about your ENV’s not setup, make sure you have exported them in the above step.
+
+Open up a python prompt and import ibm_db
+
+$ python
+Python 2.5.1 (r251:54863, Oct 5 2007, 13:36:32)
+[GCC 4.1.3 20070929 (prerelease) (Ubuntu 4.1.2-16ubuntu2)] on linux2
+Type “help”, “copyright”, “credits” or “license” for more information.
+>>> import ibm_db
+>>> ibm_db_conn = ibm_db.connect(‘pydev’, ‘db2inst1’, ‘secret’)
+>>> import ibm_db_dbi
+>>> conn = ibm_db_dbi.Connection(ibm_db_conn)
+>>> conn.tables(‘SYSCAT’, ‘%’)
