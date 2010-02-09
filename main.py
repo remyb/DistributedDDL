@@ -1,9 +1,25 @@
-import ibm_db
+import ibm_db, ConfigParser
 
 # connect to database
-conn = ibm_db.connect('SAMPLE','db2inst1','password') # insert here with your connection info
-db1 = ibm_db.connect('ASSIGN01','db2inst1','password') # insert here with your connection info
-db2 = ibm_db.connect('ASSIGN02','db2inst1','password') # insert here with your connection info
+conn = ibm_db.connect('SAMPLE','db2inst1','xxx') # insert here with your connection info
+db1 = ibm_db.connect('ASSIGN01','db2inst1','xxx') # insert here with your connection info
+db2 = ibm_db.connect('ASSIGN02','db2inst1','xxx') # insert here with your connection info
+
+# read config and parse
+def config(section):
+  config = ConfigParser.RawConfigParser()
+  config.read('test.cfg')
+  dict = {}
+  options = config.options(section)
+  for option in options:
+    try:
+			dict[option] = config.get(section, option)
+			if dict[option] == -1:
+				DebugPrint("skip: %s" % option)
+    except:
+    	print("exception on %s!" % option)
+    	dict[option] = None
+  return dict
 
 #show stats on database
 def client_print(db): 
@@ -13,7 +29,7 @@ def client_print(db):
   print "DATA_SOURCE_NAME: string(%d) \"%s\"" % (len(client.DATA_SOURCE_NAME), client.DATA_SOURCE_NAME)
   print "DRIVER_ODBC_VER: string(%d) \"%s\"" % (len(client.DRIVER_ODBC_VER), client.DRIVER_ODBC_VER)
   print "ODBC_VER: string(%d) \"%s\"" % (len(client.ODBC_VER), client.ODBC_VER)
-  print "ODBC_SQL_CONFORMANCE: string(%d) \"%s\"" % (len(client.ODBC_SQL_CONFORMANCE),      client.ODBC_SQL_CONFORMANCE)
+  print "ODBC_SQL_CONFORMANCE: string(%d) \"%s\"" % (len(client.ODBC_SQL_CONFORMANCE), client.ODBC_SQL_CONFORMANCE)
   print "APPL_CODEPAGE: int(%s)" % client.APPL_CODEPAGE
   print "CONN_CODEPAGE: int(%s)" % client.CONN_CODEPAGE
 
@@ -49,9 +65,11 @@ def print_table():
     dictionary = ibm_db.fetch_assoc(stmt)
 
 client_print(db1)
+print config('section')['port']
+print config('section'
 #print_table()
-create_table(db1)  # going to thread these
-create_table(db2)
+#create_table(db1)  # going to thread these
+#create_table(db2)
 #drop_table()
 ibm_db.close(conn)
 
