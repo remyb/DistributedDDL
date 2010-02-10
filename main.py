@@ -1,9 +1,9 @@
+#!/usr/bin/python
+
 #Remy Baumgarten
 #Kevin Chiogioji
 
-#!/usr/bin/python
-
-import ibm_db, ConfigParser
+import ibm_db, ConfigParser,time
 from threading import Thread
 
 # read config and parse
@@ -40,9 +40,9 @@ def exec_query(db, query):
   try:
     ibm_db.exec_immediate(db,query)
   except:
-    print "the query could not be completed:\n",query 
+    print "[*] The transaction could not be completed:", query #ibm_db.stmt_errormsg()
   else:
-    print "the query was successful:\n",query 
+    print "[*] Transaction complete: ",query
 
 # works on SAMPLE database created with db2sampl program
 def print_table():
@@ -56,24 +56,44 @@ def print_table():
     print "Department Location: ",dictionary["LOCATION"]
     dictionary = ibm_db.fetch_assoc(stmt)
 
+# check to see if dtables in CATALOG exists, if not, create it
+def create_catalog(cat, catalog):
+  try:
+    ibm_db.exec_immediate(cat,"CREATE TABLE "+catalog['table'])
+  except:
+    print "[*] NOTICE catalog table exists"
+
+# insert metadata
+def insert_catalog_row():
+  print "not ready yet"
+
+
+###############################################################################
 # read in config sections
 node1 = config('node1')
 node2 = config('node2')
 catalog = config('catalog')
-db1 = ibm_db.connect(node1['hostname'], node1['username'],node1['passwd'])
-db2 = ibm_db.connect(node2['hostname'], node2['username'],node2['passwd'])
-cat = ibm_db.connect(catalog['hostname'], catalog['username'],catalog['passwd'])
 
+# make persistant connections to distributed databases
+db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
+db2 = ibm_db.pconnect(node2['hostname'], node2['username'],node2['passwd'])
+cat = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
+
+# create catalog if doesn't exist
+create_catalog(cat,catalog)
+
+# list of nodes and queries to iterate through
 nodes = [db1,db2]
 querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","DROP TABLE BOOKS"]
 
-# foreach DDL, execute on all nodes
+# foreach DDL, execute queries on all nodes
 for query in querys:
   for node in nodes:  
-    Thread(target=exec_query,args=(node,query,)).start()
-
-# close connections
+    Thread(target=exec_query,args=(node,query,)).start()  
+ # time.sleep(4) # give time to rest before dropping a table not yet created
+  
+# close persistant connections
 for node in nodes:
   ibm_db.close(node)
-
+ibm_db.close(cat)
 
