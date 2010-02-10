@@ -82,7 +82,7 @@ db2 = ibm_db.connect(node2['hostname'], node2['username'],node2['passwd'])
 nodes = [db1,db2]
 querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","DROP TABLE BOOKS"]
 
-# foreach db execute the DDL's
+# foreach DDL, execute on all nodes
 for query in querys:
   for node in nodes:  
     Thread(target=exec_query,args=(node,query,)).start()
@@ -93,8 +93,6 @@ for node in nodes:
 #try:
 #except Exception, errtxt:
 #print errtxt
-
-#thread.start_new_thread(drop_table,(db2))
 
 #create_table(db1)  # going to thread these
 #create_table(db2)
