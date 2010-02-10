@@ -1,9 +1,9 @@
 import ibm_db, ConfigParser
 
 # connect to database
-conn = ibm_db.connect('SAMPLE','db2inst1','xxx') # insert here with your connection info
-db1 = ibm_db.connect('ASSIGN01','db2inst1','xxx') # insert here with your connection info
-db2 = ibm_db.connect('ASSIGN02','db2inst1','xxx') # insert here with your connection info
+conn = ibm_db.connect('SAMPLE','db2inst1','x') # insert here with your connection info
+db1 = ibm_db.connect('ASSIGN01','db2inst1','x') # insert here with your connection info
+db2 = ibm_db.connect('ASSIGN02','db2inst1','x') # insert here with your connection info
 
 # read config and parse
 def config(section):
@@ -65,9 +65,9 @@ def print_table():
     dictionary = ibm_db.fetch_assoc(stmt)
 
 client_print(db1)
-print config('section')['port']
-print config('section'
-#print_table()
+# for each node in config connect to that node and execute query in threads
+print "The server is: ",config('section')['server'],":",config('section')['port']
+print_table()
 #create_table(db1)  # going to thread these
 #create_table(db2)
 #drop_table()
