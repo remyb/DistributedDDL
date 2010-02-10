@@ -1,3 +1,6 @@
+#Remy Baumgarten
+#Kevin Chiogioji
+
 #!/usr/bin/python
 
 import ibm_db, ConfigParser
