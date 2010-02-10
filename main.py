@@ -1,7 +1,7 @@
+#!/usr/bin/python
+
 #Remy Baumgarten
 #Kevin Chiogioji
-
-#!/usr/bin/python
 
 import ibm_db, ConfigParser
 from threading import Thread
@@ -76,6 +76,19 @@ def print_table():
 
 #client_print(db1)
 
+# read DDLs from file
+def readDDL():
+  try:
+    f = open('ddl.txt','r+')
+    commands = f.readlines()
+    for command in commands:
+      command = command.strip()
+      print command
+    return commands
+  except:
+    print "the file could not be read\n"
+  else:
+    f.close()
 
 node1 = config('node1')
 node2 = config('node2')
@@ -89,6 +102,10 @@ querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","D
 for query in querys:
   for node in nodes:  
     Thread(target=exec_query,args=(node,query,)).start()
+
+commandList = readDDL()
+for x in commandList:
+  print x
   
 for node in nodes:
   ibm_db.close(node)
