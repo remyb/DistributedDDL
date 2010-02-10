@@ -1,9 +1,7 @@
-import ibm_db, ConfigParser
+#!/usr/bin/python
 
-# connect to database
-conn = ibm_db.connect('SAMPLE','db2inst1','x') # insert here with your connection info
-db1 = ibm_db.connect('ASSIGN01','db2inst1','x') # insert here with your connection info
-db2 = ibm_db.connect('ASSIGN02','db2inst1','x') # insert here with your connection info
+import ibm_db, ConfigParser
+from threading import Thread
 
 # read config and parse
 def config(section):
@@ -39,6 +37,7 @@ def create_table(db):
     stmt = ibm_db.exec_immediate(db,"CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);")
   except:
     print "The table probably already exists: \n----------\n" , ibm_db.stmt_errormsg()
+    return False
   else:
     print "Successfully Created Table!"
 
@@ -50,7 +49,15 @@ def drop_table(db):
     print "There may be nothing to drop! \n-----------\n:", ibm_db.stmt_errormsg()
   else:
     print "Successfully Dropped Table!"
-    
+
+# execute query
+def exec_query(db, query):
+  try:
+    ibm_db.exec_immediate(db,query)
+  except:
+    print "the query could not be completed:\n",query 
+  else:
+    print "the query was successful:\n",query 
 
 # works on SAMPLE database created with db2sampl program
 def print_table():
@@ -64,12 +71,36 @@ def print_table():
     print "Department Location: ",dictionary["LOCATION"]
     dictionary = ibm_db.fetch_assoc(stmt)
 
-client_print(db1)
-# for each node in config connect to that node and execute query in threads
-print "The server is: ",config('section')['server'],":",config('section')['port']
-print_table()
+#client_print(db1)
+
+
+node1 = config('node1')
+node2 = config('node2')
+db1 = ibm_db.connect(node1['hostname'], node1['username'],node1['passwd'])
+db2 = ibm_db.connect(node2['hostname'], node2['username'],node2['passwd'])
+
+nodes = [db1,db2]
+querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","DROP TABLE BOOKS"]
+
+# foreach db execute the DDL's
+for query in querys:
+  for node in nodes:  
+    Thread(target=exec_query,args=(node,query,)).start()
+  
+for node in nodes:
+  ibm_db.close(node)
+  
+#try:
+#except Exception, errtxt:
+#print errtxt
+
+#thread.start_new_thread(drop_table,(db2))
+
 #create_table(db1)  # going to thread these
 #create_table(db2)
+
+
 #drop_table()
-ibm_db.close(conn)
+#print_table()
+#ibm_db.close(conn)
 
