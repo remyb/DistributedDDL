@@ -35,24 +35,6 @@ def client_print(db):
   print "CONN_CODEPAGE: int(%s)" % client.CONN_CODEPAGE
 
 
-def create_table(db):
-  try:
-    stmt = ibm_db.exec_immediate(db,"CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);")
-  except:
-    print "The table probably already exists: \n----------\n" , ibm_db.stmt_errormsg()
-    return False
-  else:
-    print "Successfully Created Table!"
-
-
-def drop_table(db):
-  try:
-    stmt = ibm_db.exec_immediate(db,"DROP TABLE BOOKS")
-  except:
-    print "There may be nothing to drop! \n-----------\n:", ibm_db.stmt_errormsg()
-  else:
-    print "Successfully Dropped Table!"
-
 # execute query
 def exec_query(db, query):
   try:
@@ -74,13 +56,13 @@ def print_table():
     print "Department Location: ",dictionary["LOCATION"]
     dictionary = ibm_db.fetch_assoc(stmt)
 
-#client_print(db1)
-
-
+# read in config sections
 node1 = config('node1')
 node2 = config('node2')
+catalog = config('catalog')
 db1 = ibm_db.connect(node1['hostname'], node1['username'],node1['passwd'])
 db2 = ibm_db.connect(node2['hostname'], node2['username'],node2['passwd'])
+cat = ibm_db.connect(catalog['hostname'], catalog['username'],catalog['passwd'])
 
 nodes = [db1,db2]
 querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","DROP TABLE BOOKS"]
@@ -89,19 +71,9 @@ querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","D
 for query in querys:
   for node in nodes:  
     Thread(target=exec_query,args=(node,query,)).start()
-  
+
+# close connections
 for node in nodes:
   ibm_db.close(node)
-  
-#try:
-#except Exception, errtxt:
-#print errtxt
 
-#create_table(db1)  # going to thread these
-#create_table(db2)
-
-
-#drop_table()
-#print_table()
-#ibm_db.close(conn)
 
