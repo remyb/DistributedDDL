@@ -68,9 +68,13 @@ def create_catalog(cat, catalog):
 def insert_catalog_row(query, conn, node_conf):
     index = query.split()
     if index[0].upper() == "CREATE" or index[0].upper() == "DROP":
-      tableName = index[2]     
+      tableName = index[2]  
     elif index[0].upper() == "SELECT":
       tableName = index[3]
+      
+    if tableName.find("(") != -1:
+      tableName = tableName[0:tableName.find("(")]
+       
     cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
       " nodepasswd, partmtd, partparam1, partparam2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,);" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
     print cat_row
