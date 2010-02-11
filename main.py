@@ -96,7 +96,7 @@ def readDDL(fileName):
 
 # Check that two file names were entered
 if len(sys.argv) is not 3:
-  print "Please enter both the config file and DDL file names on the commandline"
+  print "[*] Usage: python main.py [ddl] [config.cfg] - see README for config format"
   sys.exit()    
 
 # read in config sections
