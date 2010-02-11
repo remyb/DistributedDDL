@@ -4,13 +4,13 @@
 #Kevin Chiogioji
 
 
-import ibm_db, ConfigParser,time
+import ibm_db, ConfigParser,time, sys
 from threading import Thread
 
 # read config and parse
-def config(section):
+def config(section, settings):
   config = ConfigParser.RawConfigParser()
-  config.read('test.cfg')
+  config.read(settings)
   dict = {}
   options = config.options(section)
   for option in options:
@@ -65,17 +65,23 @@ def create_catalog(cat, catalog):
     print "[*] NOTICE catalog table exists"
 
 # insert metadata
-def insert_catalog_row():
-  print "not ready yet"
+def insert_catalog_row(query, conn, node_conf):
+    index = query.split()
+    if index[0].upper() == "CREATE" or index[0].upper() == "DROP":
+      tableName = index[2]     
+    elif index[0].upper() == "SELECT":
+      tableName = index[3]
+    cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
+      " nodepasswd, partmtd, partparam1, partparam2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,);" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
+    print cat_row
 
 # read DDLs from file
-def readDDL():
+def readDDL(fileName):
   try:
-    f = open('ddl.txt','r+')
+    f = open(fileName,'r')
     commands = f.readlines()
     for command in commands:
       command = command.strip()
-      print command
     return commands
   except:
     print "the file could not be read\n"
@@ -83,10 +89,16 @@ def readDDL():
     f.close()
 
 ###############################################################################
+
+# Check that two file names were entered
+if len(sys.argv) is not 3:
+  print "Please enter both the config file and DDL file names on the commandline"
+  sys.exit()    
+
 # read in config sections
-node1 = config('node1')
-node2 = config('node2')
-catalog = config('catalog')
+node1 = config('node1', sys.argv[2])
+node2 = config('node2', sys.argv[2])
+catalog = config('catalog', sys.argv[2])
 
 # make persistant connections to distributed databases
 db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
@@ -98,18 +110,18 @@ create_catalog(cat,catalog)
 
 # list of nodes and queries to iterate through
 nodes = [db1,db2]
-querys = ["CREATE TABLE BOOKS(isbn char(14), title char(80), price decimal);","DROP TABLE BOOKS"]
+querys = readDDL(sys.argv[1])
 
 # foreach DDL, execute queries on all nodes
 for query in querys:
   for node in nodes:  
-    Thread(target=exec_query,args=(node,query,)).start()  
+    Thread(target=exec_query,args=(node,query,)).start()
+    if node is db1:
+      insert_catalog_row(query, cat, node1)
+    elif node is db2:
+      insert_catalog_row(query, cat, node2)  
  # time.sleep(4) # give time to rest before dropping a table not yet created
  
-# Print list of read commands
-commandList = readDDL()
-for x in commandList:
-  print x
   
 # close persistant connections
 for node in nodes:
