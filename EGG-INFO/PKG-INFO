@@ -1,0 +1,21 @@
+Metadata-Version: 1.0
+Name: ibm-db
+Version: 1.0
+Summary: Python DBI driver for DB2 (LUW, zOS, i5) and IDS
+Home-page: http://pypi.python.org/pypi/ibm_db/
+Author: IBM Application Development Team
+Author-email: opendev@us.ibm.com
+License: Apache License 2.0
+Download-URL: http://code.google.com/p/ibm-db/downloads/list
+Description: 
+        This extension is the implementation of Python Database API Specification v2.0
+        The extension supports DB2 (LUW, zOS, i5) and IDS (Informix Dynamic Server)
+Keywords: database DB-API interface IBM Data Servers DB2 Informix IDS
+Platform: LinuxIA32
+Platform: Win32
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: Microsoft :: Windows :: Windows NT/2000/XP
+Classifier: Operating System :: Unix
+Classifier: Topic :: Database :: Front-Ends

@@ -1,0 +1,80 @@
+Change Log
+=============
+
+2007/12/04 (setup.py 0.2.0):
+ - added the ability to create Python Eggs by running: 
+   $ python setup.py bdist_egg
+
+2008/02/08 (setup.py 0.2.5, ibm_db-0.2.5, ibm_db_dbi-0.2.5):
+ - added support for ibm_db_sa-0.1.0 SQLAlchemy-0.4 adapter release
+ 
+2008/02/15 (setup.py 0.2.6, ibm_db-0.2.5, ibm_db_dbi-0.2.5):
+ - fixed .egg setup loading issue #1 (defect #154259) 
+ 
+2008/03/06 (setup.py 0.2.7, ibm_db-0.2.7, ibm_db_dbi-0.2.7):
+ - fixed error handling for execute when connection handle is invalid (defect #151164)
+
+2008/03/28 (setup.py 0.2.8, ibm_db-0.2.8, ibm_db_dbi-0.2.8):
+ - fixed BIGINT return handling issue #5 (defect #150638)
+ - fixed autocommit default issue #6 (defect #156919)
+ - fixed _get_exception() tuple issue #8 (defect #156925)
+
+2008/05/08 (setup.py 0.2.9, ibm_db-0.2.9, ibm_db_dbi-0.2.9):
+ - fixed fetch first N rows
+only optimize for N rows issue #2 (defect #154260)
+ - fixed extra count() query issue #7 (defect #156926)
+ - fixed setup.py exit issue if env not set (defect #158296)
+
+2008/07/16 (setup.py 0.2.9.1, ibm_db-0.2.9.1, ibm_db_dbi-0.2.9.1):
+ - fixed Compilation fail on DB2 versions < 9 due to SQL_DECFLOAT declaration ( defect #162728)
+ 
+2008/08/24 (setup.py 0.3.0, ibm_db-0.3.0, ibm_db_dbi-0.3.0):
+ - Added trusted context support in driver.
+ 
+2008/10/08 (setup.py 0.4.0, ibm_db-0.4.0, ibm_db_dbi-0.4.0):
+ - fixed memory leak in fetch_assoc issue #13 (defect #165205)
+ - fixed reference counting errors in _python_ibm_db_bind_fetch_helper issue #14 (defect #167122)
+ - fixed ibm_db_dbi.Connection.tables() returning empty list issue #16 (defect #167059)
+ - adjusted error message if IBM DS environment variables not set.
+
+2008/11/05 (setup.py 0.4.1, ibm_db-0.4.1, ibm_db_dbi-0.4.1):
+ - Added zOS and iSeries(System i) support.
+ 
+2009/02/16 (setup.py 0.6.0, ibm_db-0.6.0, ibm_db_dbi-0.6.0):
+ - New feature - Unicode support for driver and wrapper (defect #166036)
+ - New Feature - DB2 on MacOS support (both Client and Server)
+ - fixed Metadata not loading table info (defect #158705)
+ - fixed problem of real datatype (defect #168619)
+ - Python 2.6 support on driver and wrapper (defect #169629)
+ - decfloat support (defect #95795)
+ - Code clean up and formatting.
+ - Test cases renamed to reflect their functions.
+ 
+2009/03/16 (setup.py 0.7.0, ibm_db-0.7.0, ibm_db_dbi-0.7.0):
+ - Fixed Graphic column returning nil problem (defect #172150)
+ - Removed warnings while building driver (defect #163787)
+ - Fixed ibm_db.set_option() failing if unicode is passed to dictionary. (defect #172432)
+ - Code clean up and formatting. 
+ 
+2009/05/11 (setup.py 0.7.2, ibm_db-0.7.2, ibm_db_dbi-0.7.2):
+ - Memory cleanup - Fixed a lot of issues leading to memory leaks.
+ - New Feature - Added support for SQLRowCount to return correct results on select queries.
+   DB2 supports this from DB2 V95FP3 onwards. See test cases 17,18,19 for samples. (defect #173237)
+ 
+2009/05/27 (setup.py 0.7.2.1, ibm_db-0.7.2.1, ibm_db_dbi-0.7.2.1):
+ - Fixed Backward Compatibility issue with SQLROWCOUNT (defect #185120)
+
+2009/06/25 (setup.py 0.7.2.5, ibm_db-0.7.2.5, ibm_db_dbi-0.7.2.5):
+ - Support for inserting BigInt numbers in bigInt type column with prepare statement (defect #184705)
+ 
+2009/09/03 (setup.py 0.8.0, ibm_db-0.8.0, ibm_db_dbi-0.8.0):
+ - Added new API "callproc" to support stored procedure (defect#183022)-  Refer test cases for samples and "http://code.google.com/p/ibm-db/wiki/APIs" for API Usage
+ - support OUT variable in stored procedure
+ - Changes in Test cases (test_146_CallSPINAndOUTParams.py, test_148_CallSPDiffBindPattern_01.py, test_52949_TestSPIntVarcharXml.py) for calling strored procedure through new API "callproc"
+ - Removed warnings while building driver
+
+2009/10/14 (setup.py 1.0, ibm_db-1.0, ibm_db_dbi-1.0):
+ - New Feature - added support for UCS-4 build python (defect #174236)
+ - Removed memory leak in callproc API (defect #191526)
+ - Added support for datetime/time,buffer object type in callproc API (defect #191029)
+ - Removed error in executing statement through wrapper when result set contains LOBs/xml data 
