@@ -95,7 +95,7 @@ def readDDL(fileName):
 ###############################################################################
 
 # Check that two file names were entered
-if len(sys.argv) is not 3:
+if len(sys.argv) is not 3 or sys.argv[2][sys.argv[2].rfind(".")+1:] != "cfg":
   print "[*] Usage: python main.py [ddl] [config.cfg] - see README for config format"
   sys.exit()    
 
