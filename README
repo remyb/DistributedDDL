@@ -1,0 +1,49 @@
+======== Welcome to DistributedDDL =============
+by Remy and Kevin for ICS 421 - Database Systems
+================================================
+
+Intro:
+DistributedDDL is a program to learn about how
+distributed database systems work.  It parses a
+config of nodes (databases) including a catalog
+that stores records of transactions.  The tran-
+actions are processed using threads.
+
+Todo:
+Currently DistributedDDL does not employ a proper
+SQL grammer parser.  This will be a feature of
+the next version.  We are currently looking at
+SQLParser but that decision may change after some
+further research into this topic.
+
+Instructions:
+
+config.cfg - This file is required and must be in
+the standard ini format used with Python's ConfigParser
+in the standard library.  The file can be named anything
+but must end with the *cfg* extension.  
+
+ddl - You may enter any DDL's for DistributedDDL to
+process.  This file does not have any specific on its
+name.  The syntax should be one query per line.  When
+SQL grammer is brought into this project at the next 
+release more complicated queries will be allowed. 
+
+Run:
+
+1)  chmod +x main.py; ./main.py ddl.txt config.cfg
+
+OR
+
+2) python main.py ddl.txt config.cfg
+
+For now the order is important.  Next release flags will
+be used to distinguish between other arguments.
+
+For questions or comments:
+Remy Baumgarten <remy.baumgarten@gmail.com>
+Kevin Chiogioji <kchiogio@gmail.com>
+
+We encourage you to download or fork out project at github.com:
+http://github.com/remyb/DistributedDDL
+
