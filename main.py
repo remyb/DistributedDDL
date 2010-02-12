@@ -4,7 +4,7 @@
 #Kevin Chiogioji
 
 
-import ibm_db, ConfigParser,time, sys
+import ibm_db,ConfigParser,sys
 from threading import Thread
 
 # read config and parse
