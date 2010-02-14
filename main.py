@@ -3,25 +3,28 @@
 #Remy Baumgarten
 #Kevin Chiogioji
 
-
 import ibm_db,ConfigParser,sys
 from threading import Thread
 
 # read config and parse
 def config(section, settings):
-  config = ConfigParser.RawConfigParser()
-  config.read(settings)
-  dict = {}
-  options = config.options(section)
-  for option in options:
-    try:
+	config = ConfigParser.RawConfigParser()
+	config.read(settings)
+	dict = {}
+	try:
+		options = config.options(section)
+	except:
+		print "[*] The file is not in the correct format, please consult readme"
+		sys.exit()
+	for option in options:
+		try:
 			dict[option] = config.get(section, option)
 			if dict[option] == -1:
 				DebugPrint("skip: %s" % option)
-    except:
-    	print("exception on %s!" % option)
-    	dict[option] = None
-  return dict
+		except:
+			print("exception on %s!" % option)
+			dict[option] = None
+	return dict
 
 #show stats on database
 def client_print(db): 
@@ -62,7 +65,7 @@ def create_catalog(cat, catalog):
   try:
     ibm_db.exec_immediate(cat,"CREATE TABLE "+catalog['table'])
   except:
-    print "[*] NOTICE catalog table exists"
+    print "[*] NOTICE catalog table exists, continuing..."
 
 # insert metadata
 def insert_catalog_row(query, conn, node_conf):
@@ -76,8 +79,10 @@ def insert_catalog_row(query, conn, node_conf):
     tableName = tableName[0:tableName.find("(")]
        
   cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
-    " nodepasswd, partmtd, partparam1, partparam2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,);" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
+    " nodepasswd, partmtd, partparam1, partparam2) VALUES ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s');" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
   print cat_row
+  stmt = ibm_db.exec_immediate(conn,cat_row)
+  print "[*] Cataloging transaction...done"
 
 # read DDLs from file
 def readDDL(fileName):
@@ -124,9 +129,7 @@ for query in querys:
       insert_catalog_row(query, cat, node1)
     elif node is db2:
       insert_catalog_row(query, cat, node2)  
- # time.sleep(4) # give time to rest before dropping a table not yet created
  
-  
 # close persistant connections
 for node in nodes:
   ibm_db.close(node)
