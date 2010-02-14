@@ -48,18 +48,6 @@ def exec_query(db, query):
   else:
     print "[*] Transaction complete: ",query
 
-# works on SAMPLE database created with db2sampl program
-def print_table():
-  sql = "SELECT * FROM DEPARTMENT"
-  stmt = ibm_db.exec_immediate(conn,sql)
-  dictionary = ibm_db.fetch_assoc(stmt)
-  while dictionary != False:
-    print '==================='
-    print "Department #: ",dictionary["DEPTNO"]
-    print "Department Name: ",dictionary["DEPTNAME"]
-    print "Department Location: ",dictionary["LOCATION"]
-    dictionary = ibm_db.fetch_assoc(stmt)
-
 # check to see if dtables in CATALOG exists, if not, create it
 def create_catalog(cat, catalog):
   try:
@@ -80,7 +68,7 @@ def insert_catalog_row(query, conn, node_conf):
        
   cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
     " nodepasswd, partmtd, partparam1, partparam2) VALUES ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s');" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
-  print cat_row
+  #print cat_row
   stmt = ibm_db.exec_immediate(conn,cat_row)
   print "[*] Cataloging transaction...done"
 
