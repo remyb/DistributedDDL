@@ -8,6 +8,11 @@ my $outFileName = "temp.cfg";
 my $i;
 my $foundFirst = 0;
 
+# Append new line to end of file
+open(FILENAME, ">>clustercfg");
+print FILENAME "\n";
+close (FILENAME);
+
 # Open file for reading
 open(FILENAME, "clustercfg.txt");
  
