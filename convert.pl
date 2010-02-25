@@ -7,9 +7,16 @@ my %catalog, my %node;
 my $outFileName = "temp.cfg";
 my $i;
 my $foundFirst = 0;
+my $current;
+
+# Append new line to end of file
+open(FILENAME, ">>clustercfg");
+print FILENAME "\n";
+close (FILENAME);
+
 
 # Open file for reading
-open(FILENAME, "clustercfg.txt");
+open(FILENAME, "clustercfg") or die('clustercfg does not exist');
  
 # Read contents of file into data array 
 @data = <FILENAME>;
@@ -30,10 +37,11 @@ foreach (@data) {
 		$node{$1} = $2;
 		$foundFirst = 1;
   }
-	elsif($_ =~ /\n/ && $foundFirst) {
+	elsif(($_ =~ /\n/ && $foundFirst)) {
 		push (@nodes, {%node});
 	}
 }
+
 
  # Open file for writing
 open(OUTPUT, ">$outFileName");
