@@ -9,7 +9,7 @@ my $i;
 my $foundFirst = 0;
 
 # Open file for reading
-open(FILENAME, "clustercfg.txt");
+open(FILENAME, "clustercfg.txt") or die('clustercfg.txt does not exist');
  
 # Read contents of file into data array 
 @data = <FILENAME>;
