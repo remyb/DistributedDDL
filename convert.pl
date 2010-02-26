@@ -6,9 +6,9 @@ my @data, my @nodes;
 my %catalog, my %node;
 my $outFileName = "temp.cfg";
 my $foundFirst = 0;
+my $Last=0;
 
 # Open file for reading
-
 open(FILENAME, "clustercfg") or die('clustercfg.txt does not exist');
 
 # Read contents of file into data array 
@@ -38,6 +38,10 @@ foreach (@data) {
 	if ($_ eq $data[$#data]) { 
 	  push (@nodes, {%node}); 
 	}
+	
+	if ($_ eq $data[$#data]) {
+    push (@nodes, {%node});
+  }
 }
 
  # Open file for writing
