@@ -7,20 +7,26 @@ my %catalog, my %node;
 my $outFileName = "temp.cfg";
 my $i;
 my $foundFirst = 0;
-
-# Append new line to end of file
-open(FILENAME, ">>clustercfg");
-print FILENAME "\n";
-close (FILENAME);
+my $Last=0;
 
 # Open file for reading
-open(FILENAME, "clustercfg.txt");
+open(FILENAME, "clustercfg");
  
 # Read contents of file into data array 
 @data = <FILENAME>;
 
 # Close file after reading
 close(FILENAME);
+
+# Remove any new lines from end of data array
+for ($i=$#data; $i>0; $i--) {
+  if($data[$i] eq "\n") {
+    pop(@data);
+  }
+  else {
+    last;
+  }
+}
 
 # Create hash for catalog section
 foreach (@data) {
@@ -38,6 +44,10 @@ foreach (@data) {
 	elsif($_ =~ /\n/ && $foundFirst) {
 		push (@nodes, {%node});
 	}
+	
+	if ($_ eq $data[$#data]) {
+    push (@nodes, {%node});
+  }
 }
 
  # Open file for writing
