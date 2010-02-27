@@ -85,6 +85,17 @@ def readDDL(fileName):
   else:
     f.close()
 
+def print_table(conn, column, table):
+	sql = "SELECT " + column + " FROM " + table
+	stmt = ibm_db.exec_immediate(conn,sql)
+	dictionary = ibm_db.fetch_assoc(stmt)
+	while dictionary != False:
+		print '==================='
+		print "Department #: ",dictionary[0]
+		print "Department Name: ",dictionary[1]
+		print "Department Location: ",dictionary[1]
+		dictionary = ibm_db.fetch_assoc(stmt)
+
 # Assignment 1 - Part 1 and 2
 def assignment1():
 	# Check that two file names were entered
@@ -116,7 +127,7 @@ def assignment1():
 				insert_catalog_row(query, cat, node1)
 			elif node is db2:
 				insert_catalog_row(query, cat, node2)
-				
+	
 	# close persistant connections
 	for node in nodes:
 		ibm_db.close(node)
