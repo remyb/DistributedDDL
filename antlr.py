@@ -24,11 +24,9 @@ class GrammerParse:
       self.table = r.tree.children[2].toString()
       self.command = "CREATE"
     elif( r.tree.children[0].toString().lower() == "select"):
-      self.tree = r.tree.toStringTree()
       self.table = r.tree.children[3].toString()
       self.command = "SELECT"
     elif( r.tree.children[0].toString().lower() == "drop"):
-      self.tree = r.tree.toStringTree()
       self.table = r.tree.children[1].toString()
       self.command = "DROP" 
 
