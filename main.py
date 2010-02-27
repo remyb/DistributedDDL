@@ -86,14 +86,15 @@ def readDDL(fileName):
     f.close()
 
 def print_table(conn, column, table):
-	sql = "SELECT " + column + " FROM " + table
+	sql = "SELECT " + column + " FROM " + table + ";"
+	print sql
 	stmt = ibm_db.exec_immediate(conn,sql)
 	dictionary = ibm_db.fetch_assoc(stmt)
 	while dictionary != False:
 		print '==================='
-		print "Department #: ",dictionary[0]
-		print "Department Name: ",dictionary[1]
-		print "Department Location: ",dictionary[1]
+		print "Department #: ",dictionary["SEX"]
+		print "Department Name: ",dictionary["BIRTHDATE"]
+		print "Department Location: ",dictionary["SALARY"]
 		dictionary = ibm_db.fetch_assoc(stmt)
 
 # Assignment 1 - Part 1 and 2
