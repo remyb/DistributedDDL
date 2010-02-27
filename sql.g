@@ -11,6 +11,7 @@ LPAR	=	'(';
 RPAR  	=	')';
 TERMINATOR    = ';';
 STAR  = '*';
+EQUALS = '=';
 }
 
 
@@ -44,6 +45,8 @@ TABLE 	:	'table' | 'TABLE';
 SELECT  : 'select' | 'SELECT';
 
 FROM    : 'from' | 'FROM';
+
+WHERE   : 'where' | 'WHERE';
 
 DROP    : 'drop' | 'DROP';
 
@@ -121,12 +124,14 @@ colspeclist
 createtablestmt 
 	:	CREATE TABLE ID LPAR colspeclist RPAR;
 
-colnamelist : ID (COMMA ID)* | STAR; 
+colnamelist : ID (COMMA ID)*; 
 
 tablelist : ID (COMMA ID)*; 	
 	
 selectstmt
-  : SELECT colnamelist FROM ID;
+  : SELECT STAR FROM ID
+  | SELECT colnamelist FROM ID
+  | SELECT colnamelist FROM ID WHERE ID EQUALS ID;
   
 dropstmt
   : DROP ID;  
