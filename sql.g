@@ -10,6 +10,7 @@ COMMA 	=	',';
 LPAR	=	'(';
 RPAR  	=	')';
 TERMINATOR    = ';';
+STAR  = '*';
 }
 
 
@@ -40,6 +41,11 @@ CREATE 	:	'create' | 'CREATE';
 
 TABLE 	:	'table' | 'TABLE';
 
+SELECT  : 'select' | 'SELECT';
+
+FROM    : 'from' | 'FROM';
+
+DROP    : 'drop' | 'DROP';
 
 ID  :	(('a'..'z'|'A'..'Z' | '_') ((DIGIT)*))+;
 
@@ -114,3 +120,15 @@ colspeclist
 
 createtablestmt 
 	:	CREATE TABLE ID LPAR colspeclist RPAR;
+
+colnamelist : ID (COMMA ID)* | STAR; 
+
+tablelist : ID (COMMA ID)*; 	
+	
+selectstmt
+  : SELECT colnamelist FROM ID;
+  
+dropstmt
+  : DROP ID;  
+  
+sqlstmt: createtablestmt | selectstmt | dropstmt;
