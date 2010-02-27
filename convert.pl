@@ -9,7 +9,6 @@ my $foundFirst = 0;
 my $Last=0;
 
 # Open file for reading
-
 open(FILENAME, "clustercfg") or die('clustercfg.txt does not exist');
 
 # Read contents of file into data array 
@@ -30,9 +29,19 @@ foreach (@data) {
 
 # Create hashes for nodes and push each node to array
 foreach (@data) {
-	if($_ =~ m/node\d+\.(.+)=(.+$)/) { ($node{$1}, $foundFirst) = ($2, 1); }
-	elsif($_ =~ /\n/ && $foundFirst) { push (@nodes, {%node}); }
-	if ($_ eq $data[$#data]) { push (@nodes, {%node}); }
+	if($_ =~ m/node\d+\.(.+)=(.+$)/) { 
+	  ($node{$1}, $foundFirst) = ($2, 1); 
+	}
+	elsif($_ =~ /\n/ && $foundFirst) { 
+	  push (@nodes, {%node}); 
+	}
+	if ($_ eq $data[$#data]) { 
+	  push (@nodes, {%node}); 
+	}
+	
+	if ($_ eq $data[$#data]) {
+    push (@nodes, {%node});
+  }
 }
 
  # Open file for writing
