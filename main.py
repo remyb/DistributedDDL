@@ -92,9 +92,9 @@ def print_table(conn, column, table):
 	dictionary = ibm_db.fetch_assoc(stmt)
 	while dictionary != False:
 		print '==================='
-		print "Department #: ",dictionary["SEX"]
-		print "Department Name: ",dictionary["BIRTHDATE"]
-		print "Department Location: ",dictionary["SALARY"]
+		print "ISBN: ", dictionary["ISBN"]
+		print "Title: ",dictionary["TITLE"]
+		print "Author: ",dictionary["AUTHOR"]
 		dictionary = ibm_db.fetch_assoc(stmt)
 
 # Assignment 1 - Part 1 and 2
