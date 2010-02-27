@@ -6,24 +6,40 @@ from sqlLexer import sqlLexer
 from sqlParser import sqlParser
 import sys
 
-if( len(sys.argv)>1 ):
-  char_stream = antlr3.ANTLRFileStream(sys.argv[1])
-else:
-  char_stream = antlr3.ANTLRStringStream(raw_input("SQL>"))
-lexer = sqlLexer(char_stream)
-tokens = antlr3.CommonTokenStream(lexer)
-parser = sqlParser(tokens)
+# Uses ANTLR to Parse SQL Grammer.
+class GrammerParse:
+  def __init__(self, sql):
+    self.sql =  sql
+    self.tree = ""
+    self.table = ""
+    self.command = ""
+  def parse(self):
+    stream = antlr3.ANTLRFileStream(self.sql)
+    lexer = sqlLexer(stream)
+    tokens = antlr3.CommonTokenStream(lexer)
+    parser = sqlParser(tokens)
+    r = parser.sqlstmt()
+    self.tree = r.tree.toStringTree()
+    if( r.tree.children[0].toString().lower() == "create"):
+      self.table = r.tree.children[2].toString()
+      self.command = "CREATE"
+    elif( r.tree.children[0].toString().lower() == "select"):
+      self.tree = r.tree.toStringTree()
+      self.table = r.tree.children[3].toString()
+      self.command = "SELECT"
+    elif( r.tree.children[0].toString().lower() == "drop"):
+      self.tree = r.tree.toStringTree()
+      self.table = r.tree.children[1].toString()
+      self.command = "DROP" 
 
-r = parser.sqlstmt()
-
-if( r.tree.children[0].toString().lower() == "create"):
-  print "tablename = " + r.tree.children[2].toString()
-  print "tree = " + r.tree.toStringTree()
-elif( r.tree.children[0].toString().lower() == "select"):
-  print "tablename = " + r.tree.children[3].toString()
-  print "tree = " + r.tree.toStringTree()
-elif( r.tree.children[0].toString().lower() == "drop"):
-  print "tablename = " + r.tree.children[1].toString()
-  print "tree = " + r.tree.toStringTree() 
-
-
+if __name__ == '__main__':
+  if( len(sys.argv)>1 ):
+    sql = sys.argv[1]
+  else:
+    sql = raw_input("SQL>")
+  result = GrammerParse(sql)
+  result.parse()
+  print "Tree is: " + result.tree
+  print "Table is " + result.table
+  print "Command is " + result.command
+  
