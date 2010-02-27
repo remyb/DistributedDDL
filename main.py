@@ -3,28 +3,9 @@
 #Remy Baumgarten
 #Kevin Chiogioji
 
-import ibm_db,ConfigParser,sys
+import ibm_db,sys
 from threading import Thread
-
-# read config and parse
-def config(section, settings):
-	config = ConfigParser.RawConfigParser()
-	config.read(settings)
-	dict = {}
-	try:
-		options = config.options(section)
-	except:
-		print "[*] The file is not in the correct format, please consult readme"
-		sys.exit()
-	for option in options:
-		try:
-			dict[option] = config.get(section, option)
-			if dict[option] == -1:
-				DebugPrint("skip: %s" % option)
-		except:
-			print("exception on %s!" % option)
-			dict[option] = None
-	return dict
+from ConfigExtractor import ConfigExtractor
 
 #show stats on database
 def client_print(db): 
@@ -104,9 +85,10 @@ def assignment1():
 		print "[*] Usage: python main.py [ddl] [config.cfg] - see README for config format"
 		sys.exit()    
 	# read in config sections
-	node1 = config('node1', sys.argv[2])
-	node2 = config('node2', sys.argv[2])
-	catalog = config('catalog', sys.argv[2])
+	configuration = ConfigExtractor(sys.argv[2])
+	node1 = configuration.getSection('node1')
+	node2 = configuration.getSection('node2')
+	catalog = configuration.getSection('catalog')
 	
 	# make persistant connections to distributed databases
 	db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
