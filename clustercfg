@@ -6,7 +6,7 @@ catalog.driver=com.ibm.db2.jcc.DB2Driver
 catalog.hostname=jdbc:db2://10.0.0.3:50001/mycatdb
 >>>>>>> master:clustercfg
 catalog.username=db2inst1
-catalog.passwd=ics421ass1
+catalog.passwd=mypasswd
 
 numnodes=2
 
