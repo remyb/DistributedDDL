@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import antlr3
 import antlr3.tree 
 from sqlLexer import sqlLexer
