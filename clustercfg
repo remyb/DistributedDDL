@@ -1,10 +1,16 @@
+<<<<<<< HEAD:clustercfg
 catalog.driver=libdb2.a
 catalog.hostname=CATALOG
+=======
+catalog.driver=com.ibm.db2.jcc.DB2Driver
+catalog.hostname=jdbc:db2://10.0.0.3:50001/mycatdb
+>>>>>>> master:clustercfg
 catalog.username=db2inst1
-catalog.passwd=ics421ass1
+catalog.passwd=mypasswd
 
 numnodes=2
 
+<<<<<<< HEAD:clustercfg
 node1.driver=libdb2.a
 node1.hostname=ASSIGN01
 node1.username=db2inst1
@@ -14,3 +20,20 @@ node2.driver=libdb2.a
 node2.hostname=ASSIGN02
 node2.username=db2inst1
 node2.passwd=ics421ass1
+
+=======
+node1.driver=com.ibm.db2.jcc.DB2Driver
+node1.hostname=jdbc:db2://10.0.0.3:50001/mydb1
+node1.username=db2inst1
+node1.passwd=mypasswd
+
+node2.driver=com.ibm.db2.jcc.DB2Driver
+node2.hostname=jdbc:db2://10.0.0.3:50001/mydb2
+node2.username=db2inst1
+node2.passwd=mypasswd
+
+node3.driver=com.ibm.db2.jcc.DB2Driver
+node3.hostname=jdbc:db2://10.0.0.3:50001/mydb3
+node3.username=db2inst1
+node3.passwd=mypasswd
+>>>>>>> master:clustercfg
