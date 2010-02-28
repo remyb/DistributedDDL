@@ -41,7 +41,7 @@ for query in querys:
 			insert_catalog_row(query, cat, node1)
 		elif node is db2:
 			insert_catalog_row(query, cat, node2)
-	
+
 # close persistant connections
 for node in nodes:
 	ibm_db.close(node)

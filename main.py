@@ -68,9 +68,9 @@ def readDDL(fileName):
     f.close()
 
 # Prints the contents of the Query
-def print_table(conn, column, table):
-	sql = "SELECT " + column + " FROM " + table + ";"
-	print sql
+def print_results(conn,sql):
+	#sql = "SELECT " + column + " FROM " + table + ";"
+	#print sql
 	stmt = ibm_db.exec_immediate(conn,sql)
 	dictionary = ibm_db.fetch_assoc(stmt)
 	while dictionary != False:
