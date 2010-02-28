@@ -3,7 +3,7 @@ by Remy and Kevin for ICS 421 - Database Systems
 ================================================
 
 Intro:
-ClusterTest Database is a program to learn about how
+Distributed is a program to learn about how
 distributed database systems work.  It parses a
 config of nodes (databases) including a catalog
 that stores records of transactions.  The tran-
