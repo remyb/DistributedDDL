@@ -2,11 +2,12 @@
 
 use strict;
 
-my @data, my @nodes;
-my %catalog, my %node;
+my @data, my @nodes, my @nodepartinfo;
+my %catalog, my %node, my %partinfo, my %partition;
 my $outFileName = "temp.cfg";
 my $foundFirst = 0;
-my $Last=0;
+my $i, my $k;
+
 
 # Open file for reading
 open(FILENAME, "clustercfg") or die('clustercfg.txt does not exist');
@@ -18,7 +19,7 @@ open(FILENAME, "clustercfg") or die('clustercfg.txt does not exist');
 close(FILENAME);
 
 # Remove any new lines from end of data array
-for (my $i=$#data; $i>0; $i--) {
+for ($i=$#data; $i>0; $i--) {
   $data[$i] eq "\n" ? pop(@data) : last;
 }
 
@@ -29,18 +30,43 @@ foreach (@data) {
 
 # Create hashes for nodes and push each node to array
 foreach (@data) {
-	if($_ =~ m/node\d+\.(.+)=(.+$)/) { 
+	if($_ =~ m/^node\d+\.(.+)=(.+$)/) { 
 	  ($node{$1}, $foundFirst) = ($2, 1); 
+	  if ($_ eq $data[$#data]) { 
+	    push (@nodes, {%node}); 
+	  }
 	}
 	elsif($_ =~ /\n/ && $foundFirst) { 
 	  push (@nodes, {%node}); 
 	}
-	if ($_ eq $data[$#data]) { 
-	  push (@nodes, {%node}); 
-	}
-	
-	if ($_ eq $data[$#data]) {
-    push (@nodes, {%node});
+}
+
+# Create hashes for partiion information
+foreach (@data) {
+  if($_ =~ m/(tablename)=(.+$)/) {
+    $partinfo{$1} = $2;
+  }
+  elsif($_ =~ m/partition\.(method)=(.+$)/) {
+    $partinfo{$1} = $2;
+  }
+  elsif($_ =~ m/partition\.(column)=(.+$)/) {
+    $partinfo{$1} = $2;
+  }
+}
+
+# Reinitialize foundFirst variable
+$foundFirst = 0;
+
+# Create hashes for node partition information
+foreach (@data) {
+  if($_ =~ m/partition\.(node\d+\..+)=(\d+$)/) {
+    ($partition{$1}, $foundFirst) = ($2, 1);
+    if ($_ eq $data[$#data]) { 
+	    push (@nodepartinfo, {%partition}); 
+	  }
+  }
+  elsif($_ =~ m/\n/ && $foundFirst) {
+    push (@nodepartinfo, {%partition});
   }
 }
 
@@ -52,15 +78,41 @@ print OUTPUT "[catalog]\n";
 
 while(my ($key, $value) = each (%catalog)) {print OUTPUT "$key=$value\n";}
 
-print OUTPUT "table=dtables(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, partparam1 char(32), partparam2 char(32))";
+print OUTPUT "table=dtables(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, partparam1 char(32), partparam2 char(32))\n";
+
+# Remove any new lines from end of nodes array
+for ($i=$#nodes; $i>0; $i--) {
+  $nodes[$i] eq "\n" ? pop(@nodes) : last;
+}
 
 # Write out node section
-for(my $i=0; $i<@nodes; $i++){
-	print OUTPUT "\n\n[node" . ($i+1) . "]\n";
-	print OUTPUT "driver=".$nodes[$i]{'driver'}."\n";
-	print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
-	print OUTPUT "username=".$nodes[$i]{'username'}."\n";
-	print OUTPUT "passwd=".$nodes[$i]{'passwd'};
+if(@nodes) {
+  for(my $i=0; $i<@nodes; $i++){
+	  print OUTPUT "\n[node" . ($i+1) . "]\n";
+	  print OUTPUT "driver=".$nodes[$i]{'driver'}."\n";
+	  print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
+	  print OUTPUT "username=".$nodes[$i]{'username'}."\n";
+	  print OUTPUT "passwd=".$nodes[$i]{'passwd'};
+  }
+}
+
+# Write out partition information section
+if(%partinfo) {
+  foreach $k (sort keys %partinfo) {
+    print OUTPUT "\n$k = $partinfo{$k}";
+  }
+  print OUTPUT "\n";
+}
+
+# Write out node partion information section
+if(@nodepartinfo) {
+  for(my $i=0; $i<@nodepartinfo; $i++){
+    my $param1 = "node".($i+1).".param".(1);
+    my $param2 = "node".($i+1).".param".(2);
+	  print OUTPUT "\n[node" . ($i+1) . "]\n";
+	  print OUTPUT $param1."=".$nodepartinfo[$i]{$param1}."\n";
+	  print OUTPUT $param2."=".$nodepartinfo[$i]{$param2}."\n";
+  }
 }
 
 # Close file after writing
