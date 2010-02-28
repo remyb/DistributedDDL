@@ -92,7 +92,8 @@ def get_nodes(conn,tablename):
     url = dictionary["NODEURL"].rstrip()
     user = dictionary["NODEUSER"]
     passwd = dictionary["NODEPASSWD"]
-    node = (url,user,passwd)
+    driver = dictionary["NODEDRIVER"]
+    node = (url,user,passwd,driver)
     nodes.append(node)
     dictionary = ibm_db.fetch_assoc(stmt)
   return nodes
