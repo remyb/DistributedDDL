@@ -28,7 +28,11 @@ class ConfigExtractor:
     
 if __name__ == "__main__":
   # run some unit test
-  config = ConfigExtractor(sys.argv[1])
-  node1 = config.getSection('node1')
+  try:
+    config = ConfigExtractor(sys.argv[1])
+    node1 = config.getSection('node1')
+  except:
+    print "[!] Make sure you supply 1 param containing the config file to parse"
+    sys.exit();
   print "Username: " + node1['username']
   print "Password: " + node1['passwd']
