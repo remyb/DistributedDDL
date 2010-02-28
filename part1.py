@@ -16,11 +16,14 @@ if len(sys.argv) is not 3 or sys.argv[2][sys.argv[2].rfind(".")+1:] != "cfg":
 configuration = ConfigExtractor(sys.argv[2])
 node1 = configuration.getSection('node1')
 node2 = configuration.getSection('node2')
+
 catalog = configuration.getSection('catalog')
 	
 # make persistant connections to distributed databases
 db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
 db2 = ibm_db.pconnect(node2['hostname'], node2['username'],node2['passwd'])
+
+
 cat = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
 	
 # create catalog if doesn't exist

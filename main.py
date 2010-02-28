@@ -4,6 +4,10 @@
 #Kevin Chiogioji
 
 import ibm_db
+import antlr3
+import antlr3.tree 
+from sqlLexer import sqlLexer
+from sqlParser import sqlParser
 
 #show stats on database
 def client_print(db): 
@@ -16,7 +20,6 @@ def client_print(db):
   print "ODBC_SQL_CONFORMANCE: string(%d) \"%s\"" % (len(client.ODBC_SQL_CONFORMANCE), client.ODBC_SQL_CONFORMANCE)
   print "APPL_CODEPAGE: int(%s)" % client.APPL_CODEPAGE
   print "CONN_CODEPAGE: int(%s)" % client.CONN_CODEPAGE
-
 
 # execute query
 def exec_query(db, query):
@@ -64,6 +67,7 @@ def readDDL(fileName):
   else:
     f.close()
 
+# Prints the contents of the Query
 def print_table(conn, column, table):
 	sql = "SELECT " + column + " FROM " + table + ";"
 	print sql
@@ -76,7 +80,46 @@ def print_table(conn, column, table):
 		print "Author: ",dictionary["AUTHOR"]
 		dictionary = ibm_db.fetch_assoc(stmt)
 
+# Get nodes from catalog for a specific table
+# and return it as a list (url, user,passwd)
+def get_nodes(conn,tablename):
+  sql = "SELECT DISTINCT * FROM DTABLES WHERE TNAME = '" + tablename + "';"
+  print "\t",sql
+  stmt = ibm_db.exec_immediate(conn,sql)
+  dictionary = ibm_db.fetch_assoc(stmt)
+  nodes = []
+  while dictionary != False:
+    url = dictionary["NODEURL"].rstrip()
+    user = dictionary["NODEUSER"]
+    passwd = dictionary["NODEPASSWD"]
+    node = (url,user,passwd)
+    nodes.append(node)
+    dictionary = ibm_db.fetch_assoc(stmt)
+  return nodes
+		
+# returns a list of tuples for each line in the csv file
+def loadCSV(filename):
+  contents = []
+  for line in open(filename):
+    fields = line.split(',');
+    number = fields[0]
+    title = fields[1]
+    author = fields[2]
+    book = (number,title,author)
+    contents.append(book)
+  return contents
 
-
-
-
+# parse to obtain tablename
+def get_table(sql):
+  stream = antlr3.ANTLRStringStream(sql)
+  lexer = sqlLexer(stream)
+  tokens = antlr3.CommonTokenStream(lexer)
+  parser = sqlParser(tokens)
+  r = parser.sqlstmt()
+  tree = r.tree.toStringTree()
+  if( r.tree.children[0].toString().lower() == "create"):
+    return r.tree.children[2].toString()
+  elif( r.tree.children[0].toString().lower() == "select"):
+    return r.tree.children[3].toString()
+  elif( r.tree.children[0].toString().lower() == "drop"):
+    return r.tree.children[1].toString()
