@@ -98,6 +98,8 @@ if(@nodes) {
 
 # Write out partition information section
 if(%partinfo) {
+  # Write out catalog section
+  print OUTPUT "\n[partition]";
   foreach $k (sort keys %partinfo) {
     print OUTPUT "\n$k = $partinfo{$k}";
   }
