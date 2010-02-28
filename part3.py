@@ -4,7 +4,7 @@ import sys
 from main import *
 from antlr import *
 from ConfigExtractor import ConfigExtractor
-
+from threading import Thread
 
 if len(sys.argv) is not 3:
   print "[*] Usage: python part3.py [temp.cfg] [sqlfile] - see README for config format"
@@ -31,6 +31,10 @@ for nodes in nodelist:
     print node
     print "[*] Placing connections into a list..."
     connections.append(ibm_db.pconnect(node[0], node[1],node[2]))
+for query in lines: 
+  print "processing this query: ", query
+  for database in connections:
+    Thread(target=print_results,args=(database,query,)).start()
   
   
   
