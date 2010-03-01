@@ -129,13 +129,12 @@ colspeclist
 createtablestmt 
 	:	CREATE TABLE ID LPAR colspeclist RPAR;
 
-colnamelist : ID (COMMA ID)*; 
+colnamelist : ID (COMMA ID)* | STAR; 
 
 tablelist : ID (COMMA ID)*; 	
 	
 selectstmt
-  : SELECT STAR FROM ID
-  | SELECT colnamelist FROM ID
+  : SELECT colnamelist FROM ID
   | SELECT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE
   | SELECT DISTINCT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE;
   
