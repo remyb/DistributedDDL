@@ -52,6 +52,8 @@ WHERE   : 'where' | 'WHERE';
 
 DROP    : 'drop' | 'DROP';
 
+DISTINCT: 'distinct' | 'DISTINCT';
+
 ID  :	(('a'..'z'|'A'..'Z' | '_') ((DIGIT)*))+;
 
 QUOTE : '\'';
@@ -134,7 +136,8 @@ tablelist : ID (COMMA ID)*;
 selectstmt
   : SELECT STAR FROM ID
   | SELECT colnamelist FROM ID
-  | SELECT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE;
+  | SELECT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE
+  | SELECT DISTINCT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE;
   
 dropstmt
   : DROP TABLE ID;  
