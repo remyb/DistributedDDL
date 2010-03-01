@@ -13,7 +13,7 @@ my $i, my $k;
 
 
 # Open file for reading
-open(FILENAME, "clustercfg_1") or die('clustercfg.txt does not exist');
+open(FILENAME, $ARGV[0]) or die('clustercfg.txt does not exist');
 
 # Read contents of file into data array 
 @data = <FILENAME>;
@@ -53,6 +53,9 @@ foreach (@data) {
     $partinfo{$1} = $2;
   }
   elsif($_ =~ m/partition\.(column)=(.+$)/) {
+    $partinfo{$1} = $2;
+  }
+  elsif($_ =~ m/partition\.(param1)=(.+$)/) {
     $partinfo{$1} = $2;
   }
 }

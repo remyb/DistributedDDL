@@ -4,12 +4,6 @@ catalog.username=db2inst1
 catalog.passwd=ics421ass1
 
 tablename=books
-partition.method=range
+partition.method=hash
 partition.column=isbn
-
-numnodes=2
-partition.node1.param1=1
-partition.node1.param2=10
-
-partition.node2.param1=10
-partition.node2.param2=20
+partition.param1=2

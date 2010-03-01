@@ -16,6 +16,11 @@ configuration = ConfigExtractor(sys.argv[1])
 catalog = configuration.getSection('catalog')
 partition = configuration.getSection('partition')
 
+# Get Node partition information if range is specified
+if(partition['method']=="range"):
+  part_info1 = configuration.getSection('node1')
+  part_info2 = configuration.getSection('node2')
+
 # Make persistant catalog connection
 conn = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
 
@@ -42,13 +47,29 @@ elif method == partmtd[1]:
   column = partition['column']
   for row in csv_contents:
     if column == 'isbn':
-      print row[0]
-      if row[0] >  and row[0] < 
+      if row[0] > part_info1["node1.param1"] and row[0] <= part_info1["node1.param2"]:
+        print row[0] + " in partition 1"
+      elif row[0] > part_info2["node2.param1"] and row[0] <= part_info2["node2.param2"]:
+        print row[0] + " in partition 2"   
     elif column == 'title':
-      print row[1]
-            
+      if row[1] > part_info1["node1.param1"] and row[1] <= part_info1["node1.param2"]:
+        print row[1] + " in partition 1"
+      elif row[1] > part_info2["node2.param1"] and row[1] <= part_info2["node2.param2"]:
+        print row[1] + " in partition 2"           
     elif column == 'author':
-      print row[2]
+      if row[2] > part_info1["node1.param1"] and row[2] <= part_info1["node1.param2"]:
+        print row[2] + " in partition 1"
+      elif row[2] > part_info2["node2.param1"] and row[2] <= part_info2["node2.param2"]:
+        print row[2] + " in partition 2"      
+elif method == partmtd[2]:
+  print "hash method"
+  for row in csv_contents:
+    nodenum = (int(row[0])%int(partition["param1"]))+1 
+    print nodenum
+    if (nodenum==1):
+      print row[0] + " in partition 1"
+    elif (nodenum==2):
+      print row[0] + " in partition 2"
 else:
   print "failbot", method, partmtd[1]
 
