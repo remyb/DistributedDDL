@@ -12,6 +12,7 @@ RPAR  	=	')';
 TERMINATOR    = ';';
 STAR  = '*';
 EQUALS = '=';
+QUOTE = ''';
 }
 
 
@@ -133,7 +134,8 @@ tablelist : ID (COMMA ID)*;
 selectstmt
   : SELECT STAR FROM ID
   | SELECT colnamelist FROM ID
-  | SELECT colnamelist FROM ID WHERE ID EQUALS ID;
+  | SELECT colnamelist FROM ID WHERE ID EQUALS ID
+  | SELECT colnamelist FROM ID WHERE ID EQUALS QUOTE ID QUOTE;
   
 dropstmt
   : DROP TABLE ID;  
