@@ -116,7 +116,7 @@ def print_contents(conn,sql):
   dictionary = ibm_db.fetch_both(stmt)
   while dictionary != False:
     print "ITEM: ",dictionary[0]
-    dictionary = ibm_db.fetch_assoc(stmt)
+    dictionary = ibm_db.fetch_both(stmt)
 
 # Get nodes from catalog for a specific table
 # and return it as a list (url, user,passwd)

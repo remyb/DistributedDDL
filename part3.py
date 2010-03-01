@@ -17,7 +17,9 @@ nodelist = []
 for query in lines:
   #get tablename
   query = query.rstrip()
+  print query,"<----"
   if query == ';':
+    print "FOUND",query
     continue
   tablename = get_table(query)
   #get nodes where this table occurs
@@ -33,7 +35,10 @@ for nodes in nodelist:
     print "[*] Placing connections into a list..."
     print "NODES",node[1],node[2],node[3]
     connections.append(ibm_db.pconnect(node[1], node[2],node[3]))
-for query in lines: 
+for query in lines:
+  query = query.rstrip()
+  if query == ';':
+    continue 
   print "processing this query: ", query
   for database in connections:
     Thread(target=print_contents,args=(database,query,)).start()
