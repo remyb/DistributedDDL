@@ -1,0 +1,5 @@
+catalog.driver=libdb2.a
+catalog.hostname=CATALOG
+catalog.username=db2inst1
+catalog.passwd=ics421ass1
+
