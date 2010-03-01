@@ -36,7 +36,7 @@ for nodes in nodelist:
 for query in lines: 
   print "processing this query: ", query
   for database in connections:
-    Thread(target=print_results,args=(database,query,)).start()
+    Thread(target=print_contents,args=(database,query,)).start()
   
   
   
