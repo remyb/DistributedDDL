@@ -7,14 +7,14 @@ from threading import Thread
 from main import *
 
 # Check for Proper Usage
-if len(sys.argv) is not 3 or sys.argv[2][sys.argv[2].rfind(".")+1:] != "cfg":
+if len(sys.argv) is not 3: # or sys.argv[][sys.argv[2].rfind(".")+1:] != "cfg":
 	print "[*] Usage: python main.py [ddl] [config.cfg] - see README for config format"
 	sys.exit() 
    
 # read in config sections
-node1 = config_extract(sys.argv[2], 'node1')
-node2 = config_extract(sys.argv[2], 'node2')
-catalog = config_extract(sys.argv[2], 'catalog')	
+node1 = config_extract(sys.argv[1], 'node1')
+node2 = config_extract(sys.argv[1], 'node2')
+catalog = config_extract(sys.argv[1], 'catalog')	
 	
 # Create strings for connections	
 #db1_info = "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s" % (node1["hostname"],node1["ip"],node1["port"],node1["username"],node1["passwd"])
@@ -33,7 +33,7 @@ create_catalog(cat,catalog)
 	
 # list of nodes and queries to iterate through
 nodes = [db1,db2]
-querys = readDDL(sys.argv[1])
+querys = readDDL(sys.argv[2])
 	
 # foreach DDL, execute queries on all nodes
 for query in querys:
