@@ -17,10 +17,10 @@ node2 = config_extract(sys.argv[2], 'node2')
 catalog = config_extract(sys.argv[2], 'catalog')
 	
 # make persistant connections to distributed databases
-db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
-db2 = ibm_db.pconnect(node2['hostname'], node2['username'],node2['passwd'])
+db1 = ibm_db.pconnect("node1['hostname']; node1['ip']; node1['port'], TCPIP, node1['username'], node1['passwd']", "", "")
+db2 = ibm_db.pconnect("node2['hostname']; node2['ip']; node2['port'], TCPIP, node2['username'], node2['passwd']", "", "")
 
-cat = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
+cat = ibm_db.pconnect("catalog['hostname']; catalog['ip']; catalog['port'], TCPIP, catalog['username'], catalog['passwd']", "", "")
 	
 # create catalog if doesn't exist
 create_catalog(cat,catalog)
