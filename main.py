@@ -109,14 +109,14 @@ def print_results(conn,sql):
 		print "Title: ",dictionary["TITLE"]
 		print "Author: ",dictionary["AUTHOR"]
 		dictionary = ibm_db.fetch_assoc(stmt)
-		
+
 def print_contents(conn,sql):
   print "SQL: ",sql
-	stmt = ibm_db.exec_immediate(conn,sql)
-	dictionary = ibm_db.fetch_both(stmt)
-	while dictionary != False:
-	  print "ITEM: ",dictionary[0]
-	  dictionary = ibm_db.fetch_assoc(stmt)
+  stmt = ibm_db.exec_immediate(conn,sql)
+  dictionary = ibm_db.fetch_both(stmt)
+  while dictionary != False:
+    print "ITEM: ",dictionary[0]
+    dictionary = ibm_db.fetch_assoc(stmt)
 
 # Get nodes from catalog for a specific table
 # and return it as a list (url, user,passwd)
