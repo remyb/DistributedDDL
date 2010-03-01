@@ -3,14 +3,12 @@
 import sys
 from main import *
 from antlr import *
-from ConfigExtractor import ConfigExtractor
 from threading import Thread
 
 if len(sys.argv) is not 3:
   print "[*] Usage: python part3.py [temp.cfg] [sqlfile] - see README for config format"
   sys.exit()   
-configuration = ConfigExtractor(sys.argv[1])
-catalog = configuration.getSection('catalog') 
+catalog = config_extract(sys.argv[1], 'catalog')
 conn = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
 # get sql
 sqllist =  open(sys.argv[2])
@@ -18,6 +16,9 @@ lines = sqllist.readlines()
 nodelist = []
 for query in lines:
   #get tablename
+  query = query.rstrip()
+  if query == ';':
+    continue
   tablename = get_table(query)
   #get nodes where this table occurs
   print "\n[*]Nodes that contain: ", tablename, ":"
