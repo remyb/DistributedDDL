@@ -5,7 +5,7 @@ catalog.passwd=ics421ass1
 
 tablename=books
 partition.method=range
-partition.column=age
+partition.column=isbn
 
 numnodes=2
 partition.node1.param1=1

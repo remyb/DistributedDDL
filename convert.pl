@@ -10,7 +10,7 @@ my $i, my $k;
 
 
 # Open file for reading
-open(FILENAME, "clustercfg") or die('clustercfg.txt does not exist');
+open(FILENAME, "clustercfg_1") or die('clustercfg.txt does not exist');
 
 # Read contents of file into data array 
 @data = <FILENAME>;
@@ -78,7 +78,7 @@ print OUTPUT "[catalog]\n";
 
 while(my ($key, $value) = each (%catalog)) {print OUTPUT "$key=$value\n";}
 
-print OUTPUT "table=dtables(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, partparam1 char(32), partparam2 char(32))\n";
+#print OUTPUT "table=dtables(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, partparam1 char(32), partparam2 char(32))\n";
 
 # Remove any new lines from end of nodes array
 for ($i=$#nodes; $i>0; $i--) {
