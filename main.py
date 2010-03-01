@@ -120,7 +120,7 @@ def get_nodes(conn,tablename):
   nodes = []
   while dictionary != False:
     url = dictionary["NODEURL"].rstrip()
-    host = url[url.rfind('/'):]
+    host = url[url.rfind('/')+1:]
     print host
     user = dictionary["NODEUSER"]
     passwd = dictionary["NODEPASSWD"]
