@@ -100,7 +100,7 @@ def readDDL(fileName):
 # Prints the contents of the Query
 def print_results(conn,sql):
 	#sql = "SELECT " + column + " FROM " + table + ";"
-	#print sql
+	print "SQL: ",sql
 	stmt = ibm_db.exec_immediate(conn,sql)
 	dictionary = ibm_db.fetch_assoc(stmt)
 	while dictionary != False:
@@ -109,6 +109,14 @@ def print_results(conn,sql):
 		print "Title: ",dictionary["TITLE"]
 		print "Author: ",dictionary["AUTHOR"]
 		dictionary = ibm_db.fetch_assoc(stmt)
+
+def print_contents(conn,sql):
+  print "SQL: ",sql
+  stmt = ibm_db.exec_immediate(conn,sql)
+  dictionary = ibm_db.fetch_both(stmt)
+  while dictionary != False:
+    print "ITEM: ",dictionary[0]
+    dictionary = ibm_db.fetch_both(stmt)
 
 # Get nodes from catalog for a specific table
 # and return it as a list (url, user,passwd)
@@ -120,10 +128,12 @@ def get_nodes(conn,tablename):
   nodes = []
   while dictionary != False:
     url = dictionary["NODEURL"].rstrip()
+    host = url[url.rfind('/')+1:]
+    print host
     user = dictionary["NODEUSER"]
     passwd = dictionary["NODEPASSWD"]
     driver = dictionary["NODEDRIVER"]
-    node = (url,user,passwd,driver)
+    node = (url,host,user,passwd,driver)
     nodes.append(node)
     dictionary = ibm_db.fetch_assoc(stmt)
   return nodes
