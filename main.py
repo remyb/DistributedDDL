@@ -100,7 +100,7 @@ def readDDL(fileName):
 # Prints the contents of the Query
 def print_results(conn,sql):
 	#sql = "SELECT " + column + " FROM " + table + ";"
-	#print sql
+	print "SQL: ",sql
 	stmt = ibm_db.exec_immediate(conn,sql)
 	dictionary = ibm_db.fetch_assoc(stmt)
 	while dictionary != False:
