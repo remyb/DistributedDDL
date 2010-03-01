@@ -36,6 +36,8 @@ except RecognitionException, e:
 
 SQLCHAR :	'char' | 'CHAR';
 
+SQLDEC  : 'dec'  | 'DEC' | 'decimal' | 'DECIMAL';
+
 SQLINT  :	'int' | 'INT' |'Int' | 'integer' | 'INTEGER' | 'Integer';
 
 CREATE 	:	'create' | 'CREATE';
@@ -112,7 +114,7 @@ fragment DIGIT :   '0'..'9' ;
 colconstraint
 	:	'not' 'null' | 'primary' 'key';
 
-coltype :	SQLINT | SQLCHAR LPAR INT RPAR;
+coltype :	SQLINT | SQLCHAR LPAR INT RPAR | SQLDEC;
 
 colname	:	ID;
 
