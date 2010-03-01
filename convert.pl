@@ -1,5 +1,8 @@
 #!usr/bin/perl -w
 
+# Kevin Chiogioji
+# Remy Baumgarten
+
 use strict;
 
 my @data, my @nodes, my @nodepartinfo;
@@ -87,9 +90,12 @@ for ($i=$#nodes; $i>0; $i--) {
 
 # Write out node section
 if(@nodes) {
+  
+
   for(my $i=0; $i<@nodes; $i++){
 	  print OUTPUT "\n[node" . ($i+1) . "]\n";
 	  print OUTPUT "driver=".$nodes[$i]{'driver'}."\n";
+	  if ($nodes[$i]{'hostname'} =~ m/^.+:/)
 	  print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
 	  print OUTPUT "username=".$nodes[$i]{'username'}."\n";
 	  print OUTPUT "passwd=".$nodes[$i]{'passwd'};
