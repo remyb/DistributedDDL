@@ -4,7 +4,6 @@
 
 import sys, ibm_db
 from threading import Thread
-from ConfigExtractor import ConfigExtractor
 from main import *
 
 # Check for Proper Usage
@@ -13,16 +12,13 @@ if len(sys.argv) is not 3 or sys.argv[2][sys.argv[2].rfind(".")+1:] != "cfg":
 	sys.exit() 
    
 # read in config sections
-configuration = ConfigExtractor(sys.argv[2])
-node1 = configuration.getSection('node1')
-node2 = configuration.getSection('node2')
-
-catalog = configuration.getSection('catalog')
+node1 = config_extract(sys.argv[2], 'node1')
+node2 = config_extract(sys.argv[2], 'node2')
+catalog = config_extract(sys.argv[2], 'catalog')
 	
 # make persistant connections to distributed databases
 db1 = ibm_db.pconnect(node1['hostname'], node1['username'],node1['passwd'])
 db2 = ibm_db.pconnect(node2['hostname'], node2['username'],node2['passwd'])
-
 
 cat = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
 	
@@ -38,9 +34,9 @@ for query in querys:
 	for node in nodes:  
 		Thread(target=exec_query,args=(node,query,)).start()
 		if node is db1:
-			insert_catalog_row(query, cat, node1)
+			insert_catalog_row(query, cat, node1, 1)
 		elif node is db2:
-			insert_catalog_row(query, cat, node2)
+			insert_catalog_row(query, cat, node2, 2)
 
 # close persistant connections
 for node in nodes:

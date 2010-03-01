@@ -8,6 +8,7 @@ import antlr3
 import antlr3.tree 
 from sqlLexer import sqlLexer
 from sqlParser import sqlParser
+import ConfigParser
 
 #show stats on database
 def client_print(db): 
@@ -21,24 +22,48 @@ def client_print(db):
   print "APPL_CODEPAGE: int(%s)" % client.APPL_CODEPAGE
   print "CONN_CODEPAGE: int(%s)" % client.CONN_CODEPAGE
 
+def config_extract(settings,section):
+  config = ConfigParser.RawConfigParser()
+  config.read(settings)
+  try:
+    options = config.options(section)
+  except:
+    print "[*] The file is not in the correct format, please consult readme"
+    sys.exit()
+  items= {}
+  for option in options:
+    try:
+      items[option] = config.get(section, option)
+      if items[option] == -1:
+        DebugPrint("skip: %s" % option)
+    except:
+      print("exception on %s!" % option)
+      items[option] = None
+  return items  
+  
 # execute query
 def exec_query(db, query):
   try:
     ibm_db.exec_immediate(db,query)
   except:
-    print "[*] The transaction could not be completed:", query #ibm_db.stmt_errormsg()
+    print "[*] The transaction could not be completed:", query# ,ibm_db.stmt_errormsg()
   else:
     print "[*] Transaction complete: ",query
+    
+    
 
 # check to see if dtables in CATALOG exists, if not, create it
 def create_catalog(cat, catalog):
   try:
-    ibm_db.exec_immediate(cat,"CREATE TABLE "+catalog['table'])
+    ibm_db.exec_immediate(cat,"create table dtables(tname char(32), nodedriver char(64), " \
+                              "nodeurl char(128), nodeuser char(16), nodepasswd char(16), " \
+                              "partmtd int, nodeid int, partcol char(32), partparam1 char(32)," \
+                              " partparam2 char(32))")
   except:
     print "[*] NOTICE catalog table exists, continuing..."
 
 # insert metadata
-def insert_catalog_row(query, conn, node_conf):
+def insert_catalog_row(query, conn, node_conf, nodeid):
   index = query.split()
   if index[0].upper() == "CREATE" or index[0].upper() == "DROP":
     tableName = index[2]  
@@ -49,7 +74,8 @@ def insert_catalog_row(query, conn, node_conf):
     tableName = tableName[0:tableName.find("(")]
        
   cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
-    " nodepasswd, partmtd, partparam1, partparam2) VALUES ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s');" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", "NULL", "NULL")  
+    " nodepasswd, partmtd, nodeid, partcol, partparam1, partparam2) VALUES" \
+    " ('%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s', '%s');" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", nodeid, "NULL", "NULL", "NULL")  
   #print cat_row
   stmt = ibm_db.exec_immediate(conn,cat_row)
   print "[*] Cataloging transaction...done"
