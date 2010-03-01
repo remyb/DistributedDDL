@@ -31,8 +31,8 @@ for nodes in nodelist:
   for node in nodes:
     print node
     print "[*] Placing connections into a list..."
-    print node[0],node[1],node[2]
-    connections.append(ibm_db.pconnect(node[0], node[1],node[2]))
+    print "NODES",node[1],node[2],node[3]
+    connections.append(ibm_db.pconnect(node[1], node[2],node[3]))
 for query in lines: 
   print "processing this query: ", query
   for database in connections:

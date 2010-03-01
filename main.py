@@ -120,10 +120,12 @@ def get_nodes(conn,tablename):
   nodes = []
   while dictionary != False:
     url = dictionary["NODEURL"].rstrip()
+    host = url[url.rfind('/'):]
+    print host
     user = dictionary["NODEUSER"]
     passwd = dictionary["NODEPASSWD"]
     driver = dictionary["NODEDRIVER"]
-    node = (url,user,passwd,driver)
+    node = (url,host,user,passwd,driver)
     nodes.append(node)
     dictionary = ibm_db.fetch_assoc(stmt)
   return nodes
