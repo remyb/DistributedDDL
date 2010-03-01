@@ -72,8 +72,8 @@ def insert_catalog_row(query, conn, node_conf, nodeid):
   #print tableName,"=============="
   #if tableName.find("(") != -1:
   #  tableName = tableName[0:tableName.find("(")]
-  tableName = get_table("create table foo (bar char(1), cat int, dog dec);") 
-  print tableName    
+  tableName = get_table(query) 
+  #print tableName    
   cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
     " nodepasswd, partmtd, nodeid, partcol, partparam1, partparam2) VALUES" \
     " ('%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s', '%s');" % (tableName, node_conf["driver"], node_conf["hostname"], node_conf["username"], node_conf["passwd"], "NULL", nodeid, "NULL", "NULL", "NULL")  
