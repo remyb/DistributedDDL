@@ -1,5 +1,8 @@
 #!usr/bin/perl -w
 
+# Kevin Chiogioji
+# Remy Baumgarten
+
 use strict;
 
 my @data, my @nodes, my @nodepartinfo;
@@ -73,10 +76,24 @@ foreach (@data) {
  # Open file for writing
 open(OUTPUT, ">$outFileName");
 
-# Write out catalog section
-print OUTPUT "[catalog]\n";
+# Write out catalog section if it exists
+if (%catalog) {
+  print OUTPUT "[catalog]\n";
 
-while(my ($key, $value) = each (%catalog)) {print OUTPUT "$key=$value\n";}
+  print OUTPUT "driver=".$catalog{'driver'}."\n";
+  if ($catalog{'hostname'} =~ m/^.+:.+:\/\/(.+):(.+)\/(.+$)/){
+    print OUTPUT "ip=".$1."\n";
+    print OUTPUT "port=".$2."\n";
+	  print OUTPUT "hostname=".$3."\n";
+  }
+  else {
+    print OUTPUT "hostname=".$catalog{'hostname'}."\n";
+  }
+  print OUTPUT "username=".$catalog{'username'}."\n";
+	print OUTPUT "passwd=".$catalog{'passwd'}."\n";
+}
+
+#while(my ($key, $value) = each (%catalog)) {print OUTPUT "$key=$value\n";}
 
 #print OUTPUT "table=dtables(tname char(32), nodedriver char(64), nodeurl char(128), nodeuser char(16), nodepasswd char(16), partmtd int, partparam1 char(32), partparam2 char(32))\n";
 
@@ -85,18 +102,25 @@ for ($i=$#nodes; $i>0; $i--) {
   $nodes[$i] eq "\n" ? pop(@nodes) : last;
 }
 
-# Write out node section
+# Write out node section if it exists
 if(@nodes) {
   for(my $i=0; $i<@nodes; $i++){
 	  print OUTPUT "\n[node" . ($i+1) . "]\n";
 	  print OUTPUT "driver=".$nodes[$i]{'driver'}."\n";
-	  print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
+	  if ($nodes[$i]{'hostname'} =~ m/^.+:.+:\/\/(.+):(.+)\/(.+$)/){
+	    print OUTPUT "ip=".$1."\n";
+	    print OUTPUT "port=".$2."\n";
+	    print OUTPUT "hostname=".$3."\n";
+	  }
+	  else {
+	    print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
+	  }
 	  print OUTPUT "username=".$nodes[$i]{'username'}."\n";
-	  print OUTPUT "passwd=".$nodes[$i]{'passwd'};
+	  print OUTPUT "passwd=".$nodes[$i]{'passwd'}."\n";
   }
 }
 
-# Write out partition information section
+# Write out partition information section if it exists
 if(%partinfo) {
   # Write out catalog section
   print OUTPUT "\n[partition]";
@@ -106,7 +130,7 @@ if(%partinfo) {
   print OUTPUT "\n";
 }
 
-# Write out node partion information section
+# Write out node partion information section if it exists
 if(@nodepartinfo) {
   for(my $i=0; $i<@nodepartinfo; $i++){
     my $param1 = "node".($i+1).".param".(1);

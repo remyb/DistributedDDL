@@ -1,17 +1,17 @@
 catalog.driver=libdb2.a
-catalog.hostname=CATALOG
+catalog.hostname=jdbc:db2://localhost:50001/catalog
 catalog.username=db2inst1
 catalog.passwd=ics421ass1
 
 numnodes=2
 
 node1.driver=libdb2.a
-node1.hostname=ASSIGN01
+node1.hostname=jdbc:db2://localhost:50001/ASSIGN01
 node1.username=db2inst1
 node1.passwd=ics421ass1
 
 node2.driver=libdb2.a
-node2.hostname=ASSIGN02
+node2.hostname=jdbc:db2://localhost:50001/ASSIGN02
 node2.username=db2inst1
 node2.passwd=ics421ass1
 
