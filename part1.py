@@ -37,7 +37,10 @@ querys = readDDL(sys.argv[1])
 	
 # foreach DDL, execute queries on all nodes
 for query in querys:
-	for node in nodes:  
+  print query,'============================='
+  if len(query) < 2:
+    continue
+  for node in nodes:  
 		Thread(target=exec_query,args=(node,query,)).start()
 		if node is db1:
 			insert_catalog_row(query, cat, node1, 1)

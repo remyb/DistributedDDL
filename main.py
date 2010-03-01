@@ -87,7 +87,10 @@ def readDDL(fileName):
     f = open(fileName,'r')
     commands = f.readlines()
     for command in commands:
-      command = command.strip()
+      #if len(command) < 2:
+        #commands.pop()
+      command = command.rstrip()
+    print commands, "returning commands"
     return commands
   except:
     print "the file could not be read\n"

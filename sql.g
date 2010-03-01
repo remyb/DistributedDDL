@@ -136,6 +136,6 @@ selectstmt
   | SELECT colnamelist FROM ID WHERE ID EQUALS ID;
   
 dropstmt
-  : DROP ID;  
+  : DROP TABLE ID;  
   
 sqlstmt: createtablestmt | selectstmt | dropstmt;
