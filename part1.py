@@ -14,13 +14,19 @@ if len(sys.argv) is not 3 or sys.argv[2][sys.argv[2].rfind(".")+1:] != "cfg":
 # read in config sections
 node1 = config_extract(sys.argv[2], 'node1')
 node2 = config_extract(sys.argv[2], 'node2')
-catalog = config_extract(sys.argv[2], 'catalog')
+catalog = config_extract(sys.argv[2], 'catalog')	
+	
+# Create strings for connections	
+#db1_info = "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s" % (node1["hostname"],node1["ip"],node1["port"],node1["username"],node1["passwd"])
+#db2_info = "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s" % (node2["hostname"],node2["ip"],node2["port"],node2["username"],node2["passwd"])
+#catalog_info = "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s" % (catalog["hostname"],catalog["ip"],catalog["port"],catalog["username"],catalog["passwd"]) 	
+
+#print db1_info	
 	
 # make persistant connections to distributed databases
-db1 = ibm_db.pconnect("node1['hostname']; node1['ip']; node1['port'], TCPIP, node1['username'], node1['passwd']", "", "")
-db2 = ibm_db.pconnect("node2['hostname']; node2['ip']; node2['port'], TCPIP, node2['username'], node2['passwd']", "", "")
-
-cat = ibm_db.pconnect("catalog['hostname']; catalog['ip']; catalog['port'], TCPIP, catalog['username'], catalog['passwd']", "", "")
+db1 = ibm_db.pconnect(node1["hostname"],node1["username"],node1["passwd"])
+db2 = ibm_db.pconnect(node2["hostname"],node2["username"],node2["passwd"])
+cat = ibm_db.pconnect(catalog["hostname"],catalog["username"],catalog["passwd"])
 	
 # create catalog if doesn't exist
 create_catalog(cat,catalog)
