@@ -88,6 +88,7 @@ if (%catalog) {
     print OUTPUT "ip=".$1."\n";
     print OUTPUT "port=".$2."\n";
 	  print OUTPUT "hostname=".$3."\n";
+	  print OUTPUT "hostname_full=".$catalog{'hostname'}."\n";
   }
   else {
     print OUTPUT "hostname=".$catalog{'hostname'}."\n";
@@ -114,6 +115,7 @@ if(@nodes) {
 	    print OUTPUT "ip=".$1."\n";
 	    print OUTPUT "port=".$2."\n";
 	    print OUTPUT "hostname=".$3."\n";
+	    print OUTPUT "hostname_full=".$nodes[$i]{'hostname'}."\n";
 	  }
 	  else {
 	    print OUTPUT "hostname=".$nodes[$i]{'hostname'}."\n";
