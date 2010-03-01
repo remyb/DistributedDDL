@@ -55,7 +55,7 @@ def exec_query(db, query):
 # check to see if dtables in CATALOG exists, if not, create it
 def create_catalog(cat, catalog):
   try:
-    ibm_db.exec_immediate(cat,"create table dtables(tname char(32), nodedriver char(64), " \
+    ibm_db.exec_immediate(cat,"create table dtables (tname char(32), nodedriver char(64), " \
                               "nodeurl char(128), nodeuser char(16), nodepasswd char(16), " \
                               "partmtd int, nodeid int, partcol char(32), partparam1 char(32)," \
                               " partparam2 char(32))")
@@ -64,18 +64,19 @@ def create_catalog(cat, catalog):
 
 # insert metadata
 def insert_catalog_row(query, conn, node_conf, nodeid):
-  index = query.split()
-  if index[0].upper() == "CREATE" or index[0].upper() == "DROP":
-    tableName = index[2]  
-  elif index[0].upper() == "SELECT":
-    tableName = index[3]
-      
-  if tableName.find("(") != -1:
-    tableName = tableName[0:tableName.find("(")]
-       
+  #index = query.split()
+  #if index[0].upper() == "create" or index[0].upper() == "DROP":
+  #  tableName = index[2]  
+  #elif index[0] == "select":
+  #  tableName = index[3]
+  #print tableName,"=============="
+  #if tableName.find("(") != -1:
+  #  tableName = tableName[0:tableName.find("(")]
+  tableName = get_table(query) 
+  #print tableName    
   cat_row = "INSERT INTO dtables (tname, nodedriver, nodeurl, nodeuser," \
     " nodepasswd, partmtd, nodeid, partcol, partparam1, partparam2) VALUES" \
-    " ('%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s', '%s');" % (tableName.rstrip(";"), node_conf["driver"], node_conf ["hostname"], node_conf["username"], node_conf["passwd"], "NULL", nodeid, "NULL", "NULL", "NULL")  
+    " ('%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s', '%s');" % (tableName, node_conf["driver"], node_conf["hostname"], node_conf["username"], node_conf["passwd"], "NULL", nodeid, "NULL", "NULL", "NULL")  
   #print cat_row
   stmt = ibm_db.exec_immediate(conn,cat_row)
   print "[*] Cataloging transaction...done"

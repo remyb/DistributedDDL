@@ -1,2 +1,2 @@
-CREATE TABLE BOOKST (isbn char(14), title char(80), price decimal);
-DROP TABLE BOOKST;
+create table remyb (isbn char(14), title char(80), price decimal);
+drop table remyb;
