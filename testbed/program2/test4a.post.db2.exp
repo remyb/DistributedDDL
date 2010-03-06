@@ -1,0 +1,78 @@
+connect to mydb1
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYDB1
+
+
+select * from t4aXXTNXX order by info
+
+INFO             AGE        
+---------------- -----------
+db1d01                     2
+db1d04                     4
+db1d05                     5
+db1d06                     8
+db1d08                     2
+db1d10                     3
+
+  6 record(s) selected.
+
+
+drop table t4aXXTNXX
+DB20000I  The SQL command completed successfully.
+
+connect reset
+DB20000I  The SQL command completed successfully.
+
+connect to mydb2
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYDB2
+
+
+select * from t4aXXTNXX order by info
+
+INFO             AGE        
+---------------- -----------
+db2d02                    20
+db2d03                    12
+db2d07                    12
+db2d09                    13
+
+  4 record(s) selected.
+
+
+drop table t4aXXTNXX
+DB20000I  The SQL command completed successfully.
+
+connect reset
+DB20000I  The SQL command completed successfully.
+
+connect to mycatdb
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYCATDB
+
+
+SELECT nodeid, partmtd, partcol, partparam1, partparam2 FROM dtables WHERE tname='t4aXXTNXX' or tname=UCASE('t4aXXTNXX') order by nodeid
+
+NODEID      PARTMTD     PARTCOL                          PARTPARAM1                       PARTPARAM2                      
+----------- ----------- -------------------------------- -------------------------------- --------------------------------
+          1           1 age                              0                                10                              
+          2           1 age                              10                               20                              
+
+  2 record(s) selected.
+
+
+connect reset
+DB20000I  The SQL command completed successfully.
+

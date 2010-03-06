@@ -1,0 +1,317 @@
+#!/bin/bash
+#############################################################################
+# Licensed Materials - Property of IBM
+#
+# IBM CONFIDENTIAL
+# OCO SOURCE MATERIALS
+#
+# (C) COPYRIGHT International Business Machines Corp. 2007, 2008
+#
+# All Rights Reserved.
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+#
+# The source code for this program is not published or otherwise divested of
+# its trade secrets, irrespective of what has been deposited with the U.S.
+# Copyright Office.
+############################################################################
+
+#################################################################
+# Script that creates tablespaces based on the amount of space
+# available on the machine.
+#################################################################
+
+INSTANCE=`whoami`
+LOGPATH=/home/${INSTANCE}/sqllib/db2dump/createts.log
+CONTAINER=/db2fs/${INSTANCE}/NODE00
+
+if [ "$(id -u)" = "0" ]; then
+   echo "This script must be run as the DB2 instance owner. " 1>&2
+   exit 1
+fi
+
+if [ -d /db2fs/${INSTANCE} ] ; then
+        PARTITIONS=`ls /db2fs/${INSTANCE}/ 2>/dev/null | wc -l`
+else
+        PARTITIONS=0
+fi
+
+PART=$(($PARTITIONS-1))
+
+counter=0
+allSpace=0
+average=0
+dataTblspc=0
+indexTblspc=0
+tempTblspc=0
+availSpace=0
+
+while [ $counter -lt $PARTITIONS ]; do
+	if [ ${counter} -lt 10 ]; then
+		CONTAINER=${CONTAINER}0${counter}
+	else 
+		CONTAINER=${CONTAINER}${counter}
+	fi
+		
+	if [ `df -k ${CONTAINER} | grep "mapper" | wc -l` -eq 1 ]; then
+    		availSpace=`df -k ${CONTAINER} | grep "/db2fs" | awk '{ print $3 }'`
+    	else
+    		availSpace=`df -k ${CONTAINER} | grep "% /" | awk '{print $4}'`
+    	fi
+    
+    	allSpace=`expr $allSpace + $availSpace`  
+      
+	counter=`expr $counter + 1`
+	CONTAINER=/db2fs/${INSTANCE}/NODE00
+done
+
+average=`expr $allSpace / $PARTITIONS`
+
+totalPart=`expr $average / 1024`
+availSpace=`expr $totalPart / 1024`
+
+spcPart=`expr $availSpace / 9`
+dataTblspc=`expr $spcPart \* 3`
+indexTblspc=`expr $spcPart \* 3`
+tempTblspc=$spcPart
+
+if [ -z $1 ] ;  then
+	echo "Usage: $0 <databasename> [<data_tablespace_size> <index_tablespace_size> <temp_tablespace_size>]";
+	echo -e "\t\t<databasename>          - The name of the database to create tablespaces for"
+	echo -e "\t\t<data_tablespace_size>  - (Optional) The size of the DATA tablespace per partition. Default is ${dataTblspc}G"
+	echo -e "\t\t<index_tablespace_size> - (Optional) The size of the INDEX tablespace per partition. Default is ${indexTblspc}G"
+	echo -e "\t\t<temp_tablespace_size>  - (Optional) The size of the TEMPORARY tablespace per partition. Default is ${tempTblspc}G"
+	exit 1
+fi
+
+DBNAME_lower=$1
+DBNAME=`echo $DBNAME_lower | tr 'a-z' 'A-Z'`
+DATA=$2
+INDEX=$3
+TEMP=$4
+output=""
+
+if [ -z $DATA ]; then
+	DATA=$dataTblspc
+fi
+
+if [ -z $INDEX ]; then
+	INDEX=$indexTblspc
+fi
+
+if [ -z $TEMP ]; then
+	TEMP=$tempTblspc
+fi
+
+echo "Please verify the following information."
+echo "Number of database partitions: ${PARTITIONS}"
+echo "Size of the DATA tablespace per partition: ${DATA}GB"
+echo "Size of the INDEX tablespace per partition: ${INDEX}GB"
+echo "Size of the TEMP tablespace per partition: ${TEMP}GB"
+echo "Is this correct? (Y/N)"
+read answer
+
+if [ $answer == "y" ] || [ $answer == "Y" ]
+then
+	echo ""
+	echo "Starting creation of tablespaces ..."
+else
+	echo "Aborting. Re-run the command with the correct parameters"
+  	exit 1
+fi
+
+checkError() {
+	ERROR=$?
+	if [ $ERROR -ne 0 ] ; then
+		echo " Error $ERROR"
+		exit 1
+	else
+		echo " OK"
+	fi
+} 
+
+
+
+connectToDatabase() {
+echo -n "Connect to $DBNAME ... "
+db2 -td';' <<EOFCONNECTDB >${LOGPATH} 2>&1
+connect to $DBNAME;
+EOFCONNECTDB
+checkError
+}
+
+connectToDatabase
+
+createTableSpaces10plus() {
+echo -n "Creating tablespaces ... "
+PART=$(($PARTITIONS-1))
+
+db2 -td';' <<EOFPART4 >${LOGPATH} 2>&1
+CONNECT TO $DBNAME;
+
+CREATE TEMPORARY TABLESPACE db2tmp
+IN DATABASE PARTITION GROUP ibmtempgroup
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/temp/db2tmp_001' ${TEMP}G)
+ON DBPARTITIONNUMS (0 to 9)
+USING (FILE '/db2fs/${INSTANCE}/NODE00 \$N /${DBNAME}/temp/db2tmp_001' ${TEMP}G)
+ON DBPARTITIONNUMS (10 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_data_001
+IN DATABASE PARTITION GROUP pdpg
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/data/ts_pd_data_001' ${DATA}G)
+ON DBPARTITIONNUMS (0 to 9)
+USING (FILE '/db2fs/${INSTANCE}/NODE00 \$N /${DBNAME}/data/ts_pd_data_001' ${DATA}G)
+ON DBPARTITIONNUMS (10 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_idx_001
+IN DATABASE PARTITION GROUP pdpg
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/data/ts_pd_idx_001' ${INDEX}G)
+ON DBPARTITIONNUMS (0 to 9)
+USING (FILE '/db2fs/${INSTANCE}/NODE00 \$N /${DBNAME}/data/ts_pd_idx_001' ${INDEX}G)
+ON DBPARTITIONNUMS (10 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+COMMIT WORK;
+CONNECT RESET;
+
+EOFPART4
+echo " OK. Log file is ${LOGPATH}";
+}
+
+
+createTableSpacesMulti() {
+echo -n "Creating tablespaces ... "
+PART=$(($PARTITIONS-1))
+
+db2 -td';' <<EOFPART5 >${LOGPATH} 2>&1
+CONNECT TO $DBNAME;
+
+CREATE TEMPORARY TABLESPACE db2tmp
+IN DATABASE PARTITION GROUP ibmtempgroup
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/temp/db2tmp_001' ${TEMP}G)
+ON DBPARTITIONNUMS (0 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_data_001
+IN DATABASE PARTITION GROUP pdpg
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/data/ts_pd_data_001' ${DATA}G)
+ON DBPARTITIONNUMS (0 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_idx_001
+IN DATABASE PARTITION GROUP pdpg
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE000 \$N /${DBNAME}/data/ts_pd_idx_001' ${INDEX}G)
+ON DBPARTITIONNUMS (0 to $PART)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+COMMIT WORK;
+CONNECT RESET;
+
+EOFPART5
+echo " OK. Log file is ${LOGPATH}";
+}
+
+
+createTableSpacesSingle() {
+echo -n "Creating tablespaces ... "
+db2 -td';' <<EOFPART6 >${LOGPATH} 2>&1
+CONNECT TO $DBNAME;
+
+CREATE TEMPORARY TABLESPACE db2tmp
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE0000/${DBNAME}/temp/db2tmp_001' ${TEMP}G)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_data_001
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE0000/${DBNAME}/data/ts_pd_data_001' ${DATA}G)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+CREATE LARGE TABLESPACE ts_pd_idx_001
+PAGESIZE 8K
+MANAGED BY DATABASE
+USING (FILE '/db2fs/${INSTANCE}/NODE0000/${DBNAME}/data/ts_pd_idx_001' ${INDEX}G)
+EXTENTSIZE 32
+PREFETCHSIZE 64
+BUFFERPOOL bpool8k
+OVERHEAD 3.69 TRANSFERRATE 0.07
+AUTORESIZE YES
+NO FILE SYSTEM CACHING;
+
+COMMIT WORK;
+CONNECT RESET;
+
+EOFPART6
+echo " OK. Log file is ${LOGPATH}";
+}
+
+if [ $PARTITIONS -ne 0 ]; then
+	if [ $PARTITIONS -gt 1 ]; then
+		if [ $PARTITIONS -gt 9 ]; then
+			createTableSpaces10plus
+			exit 0
+		else
+			createTableSpacesMulti
+			exit 0
+		fi
+	else
+		createTableSpacesSingle
+		exit 0
+	fi
+	
+fi
+exit 0

@@ -1,0 +1,243 @@
+#!/bin/bash
+
+#############################################################################
+# Licensed Materials - Property of IBM
+#
+# IBM CONFIDENTIAL
+# OCO SOURCE MATERIALS
+#
+# (C) COPYRIGHT International Business Machines Corp. 2007, 2008
+#
+# All Rights Reserved.
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+#
+# The source code for this program is not published or otherwise divested of
+# its trade secrets, irrespective of what has been deposited with the U.S.
+# Copyright Office.
+############################################################################
+
+#############################################################################################
+# Date: 11/29/2007
+# Author: Jeff Shantz <jshantz@ca.ibm.com>
+#
+# Creates a DB2 9.5 database with auto-maintanence configuration
+#
+# Revision History:
+#
+# Date		Modifed By		Description
+# ====================================================================================
+# 09/21/2007	Jeff Shantz		Created script
+#
+#############################################################################################
+
+LOGPATH=$HOME/sqllib/db2dump/createdbnew.log
+
+die()
+{
+	MSG="$1"
+
+	echo -e "\n\n$MSG"
+	echo -e "Check ${LOGPATH} for more information.\n"
+	exit 1
+}
+
+createDatabase()
+{
+        echo -n -e "[*] Creating database ${DBNAME}...\t\t"
+
+        db2 CREATE DATABASE ${DBNAME} AUTOMATIC STORAGE YES ON /db2fs COLLATE USING IDENTITY AUTOCONFIGURE USING MEM_PERCENT 10 APPLY DB ONLY 2>&1 >> ${LOGPATH} 
+
+        if [ $? != 0 ]; then
+                die "Error creating database.  Please ensure that the instance is started."
+        fi
+
+        echo "OK"
+}
+
+createPartitionGroups()
+{
+	echo -n -e "[*] Creating db partition groups ...\t\t"
+        
+db2 -tsv <<EOF >> ${LOGPATH} 2>&1
+
+CONNECT TO ${DBNAME};
+                        
+CREATE DATABASE PARTITION GROUP PDPG ON DBPARTITIONNUMS (0 to ${PART});
+CREATE DATABASE PARTITION GROUP SDPG ON DBPARTITIONNUMS (0);
+                                                        
+CONNECT RESET;
+TERMINATE;
+EOF
+
+        if [ $? != 0 ]; then
+              die "Error creating db partition groups."
+        fi
+                                                
+        echo "OK"
+}
+
+
+createBufferPools()
+{
+                if [ ${PARTITIONS} -gt 1 ]; then
+                                echo -n -e "[*] Creating buffer pools...\t\t"
+        
+db2 -tsv <<EOF >> ${LOGPATH} 2>&1
+
+CONNECT TO ${DBNAME};
+                
+CREATE BUFFERPOOL bpool8k IMMEDIATE ALL DBPARTITIONNUMS SIZE AUTOMATIC PAGESIZE 8K;
+                
+CONNECT RESET;
+TERMINATE;
+EOF
+                
+                                if [ $? != 0 ]; then
+                                                die "Error creating buffer pools."
+                                fi
+                
+                                echo "OK"
+                                
+                else
+                                echo -n -e "[*] Creating buffer pools...\t\t"
+        
+db2 -tsv <<EOF >> ${LOGPATH} 2>&1
+
+CONNECT TO ${DBNAME};
+                
+CREATE BUFFERPOOL bpool8k IMMEDIATE SIZE AUTOMATIC PAGESIZE 8K;
+                
+CONNECT RESET;
+TERMINATE;
+EOF
+                
+                                if [ $? != 0 ]; then
+                                                die "Error creating buffer pools."
+                                fi
+                
+                                echo "OK"
+                                
+                fi
+                                
+}
+
+
+configureDatabase()
+{
+                echo -n -e "[*] Configuring database...\t\t"
+        
+db2 -tsv <<EOF >> ${LOGPATH} 2>&1
+
+CONNECT TO ${DBNAME};
+CALL AUTOMAINT_SET_POLICYFILE('MAINTENANCE_WINDOW','prof_maintwindow.xml');
+CALL AUTOMAINT_SET_POLICYFILE('AUTO_REORG','prof_reorg.xml');
+CALL AUTOMAINT_SET_POLICYFILE('AUTO_RUNSTATS','prof_runstats.xml');
+UPDATE DB CFG USING auto_maint ON;
+UPDATE DB CFG USING auto_db_backup OFF;
+UPDATE DB CFG USING auto_tbl_maint ON;
+UPDATE DB CFG USING auto_runstats ON;
+UPDATE DB CFG USING auto_reorg ON;
+        
+UPDATE DBM CFG USING dftdbpath /db2fs;
+UPDATE DBM CFG USING instance_memory AUTOMATIC;
+                
+CONNECT RESET;
+TERMINATE;
+EOF
+
+#                if [ $? != 0 ]; then
+#                                die "Error setting database parameters."
+#                fi
+
+                echo "OK"
+}
+
+
+restartInstance()
+{
+	echo -n -e "[*] Restarting instance...\t\t"
+	
+	db2stop force 2>&1 >> ${LOGPATH} 
+	PORTS=`grep DB2_${INSTANCE} /etc/services | awk '{print $2}' | cut -d/ -f1`
+	for PORT in ${PORTS}
+	do
+		TIMEOUT=20
+		RUNTIME=0
+		if [ `netstat -an | grep ${PORT} | wc -l` -gt 0 ]
+		then
+			until [ `netstat -an | grep ${PORT} | wc -l` -eq 0 ]
+			do 
+				sleep 2
+				echo "${PORT} is still running... will wait for 2 more seconds..." >> ${LOGPATH}
+				RUNTIME=$((RUNTIME+2))
+				echo "RUNTIME = ${RUNTIME}" >> ${LOGPATH}
+				if [ ${RUNTIME} -ge ${TIMEOUT} ]
+				then
+					echo "Maximum timeout ${TIMEOUT} seconds is reached, breaking..." >> ${LOGPATH}
+					db2stop force 2>&1 >> ${LOGPATH}
+					break
+				fi
+			done
+		else
+			echo "${PORT} is not running."
+		fi
+	done
+	db2start 2>&1 >> ${LOGPATH}
+
+	if [ $? != 0 ]; then
+		die "* Unable to restart Database Manager for new settings to take effect.  Please restart the Manager manually."
+		exit 1
+	fi
+
+	echo "OK"
+}
+
+createDB()
+{
+	INSTANCE=`whoami`
+	DBNAME_lower=$1
+	DBNAME=`echo $DBNAME_lower | tr 'a-z' 'A-Z'`
+
+	createDatabase
+
+	PARTITIONS=0
+	if [ -d /db2fs/${INSTANCE} ] ; then
+			PARTITIONS=`ls  /db2fs/${INSTANCE}/ 2>/dev/null | wc -l`;
+	else
+			PARTITIONS=0
+	fi
+	PART=$(($PARTITIONS-1))
+
+	createPartitionGroups
+	createBufferPools
+	configureDatabase
+
+	echo "[*] Database created and configured successfully."
+
+	restartInstance
+	echo "[*] Database creation complete."
+
+}
+
+usage()
+{
+	echo "Usage: createDatabase.sh <DATABASE_NAME> [-h]"
+	echo ""
+	echo "${TAB} ${TAB} ${TAB} ${TAB} ${TAB} - To display this menu again use: ./createDatabase -h"
+	exit 1
+}
+
+
+if [[ `id -u` -eq 0 ]]; then
+	echo "You cannot run this script as root. Please change user to your DB2 instance user."
+	exit 1
+fi
+
+
+if [ -z "$1" ]; then
+	usage
+else
+	createDB "$1"
+fi

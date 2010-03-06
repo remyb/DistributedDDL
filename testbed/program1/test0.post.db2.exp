@@ -1,0 +1,59 @@
+connect to mydb1
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYDB1
+
+
+select * from XXTNXX
+
+COL1        COL2          COL3   
+----------- ------------- -------
+
+  0 record(s) selected.
+
+
+connect reset
+DB20000I  The SQL command completed successfully.
+
+connect to mydb2
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYDB2
+
+
+select * from XXTNXX
+
+COL1        COL2          COL3   
+----------- ------------- -------
+
+  0 record(s) selected.
+
+
+connect reset
+DB20000I  The SQL command completed successfully.
+
+connect to mycatdb
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = MYCATDB
+
+
+select nodedriver, nodeurl, nodeuser from dtables where tname='XXTNXX' or tname=UCASE('XXTNXX') order by nodeurl
+
+NODEDRIVER                                                       NODEURL                                                                                                                          NODEUSER        
+---------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ----------------
+com.ibm.db2.jcc.DB2Driver                                        jdbc:db2://localhost:50001/mydb1                                                                                                 db2inst1        
+com.ibm.db2.jcc.DB2Driver                                        jdbc:db2://localhost:50001/mydb2                                                                                                 db2inst1        
+
+  2 record(s) selected.
+
+

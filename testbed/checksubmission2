@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+use lib '/home/db2inst1/lib/';
+use strict;
+use Data::Dumper;
+use grading;
+
+my $passwd="ics421p2";
+my $testdir="/home/db2inst1/tests/program2";
+my %testlist=(
+               3=>["3a"],
+              4=>["4a"]);
+my @reqfiles=('compile3.sh', 'run3.sh', 'compile4.sh', 'run4.sh');
+
+chomp( my $curdir = `pwd`);
+my $stu=$curdir;
+$stu =~ s/^.*ics421\///g; 
+$stu =~ s/\/.*//g; 
+
+if (!($curdir =~ /program2/))
+{
+   print "Error: you appear to be running checksubmission2 ";
+   print "from a directory other than the expected ~/ics421/$stu/program2!\n"; 
+   exit;
+}
+
+print "-------------------------\n";
+print "The current/submission directory is:$curdir\n";
+print "Your UH email id is:$stu\n";
+print "-------------------------\n";
+
+checkRequiredFiles( $curdir,\@reqfiles);
+
+#print "checksubmission2 is still in development please check back later.\n";
+#exit;
+
+rmFiles("*.class");
+
+foreach my $part (3,4)
+{
+   print "-------------------------\n";
+   (compileCode("./compile$part.sh") == 0) or 
+      die "Fix your compile errors first and rerun checksubmission\n";
+   print "-------------------------\n";
+
+   runTests($stu, $testdir, $passwd, "./run$part.sh", $testlist{$part});
+}
+
+print "If everything looks OK (no errors), then your submission is good.\n";

@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+use lib '/home/db2inst1/lib/';
+use strict;
+use Data::Dumper;
+use grading;
+
+my $passwd="ics421p2";
+my $testdir="/home/db2inst1/tests/program1";
+my @testlist=(0);
+my @reqfiles=('compile.sh', 'run.sh');
+
+chomp( my $curdir = `pwd`);
+my $stu=$curdir;
+$stu =~ s/^.*ics421\///g; 
+$stu =~ s/\/.*//g; 
+
+
+
+if (!($curdir =~ /program1/) )
+{
+   print "Error: you appear to be running checksubmission1 ";
+   print "from a directory other than the expected ~/ics421/$stu/program1!\n"; 
+   exit;
+}
+
+print "-------------------------\n";
+print "The current/submission directory is:$curdir\n";
+
+print "Your UH email id is:$stu\n";
+print "-------------------------\n";
+
+checkRequiredFiles( $curdir,\@reqfiles);
+
+rmFiles("*.class");
+
+print "-------------------------\n";
+(compileCode("./compile.sh") == 0) or 
+   die "Fix your compile errors first and rerun checksubmission\n";
+print "-------------------------\n";
+
+runTests($stu, $testdir, $passwd, "./run.sh", \@testlist);
+
+print "If everything looks OK (no errors), then your submission is good.\n";
