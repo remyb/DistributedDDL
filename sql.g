@@ -10,7 +10,6 @@ COMMA 	=	',';
 LPAR	=	'(';
 RPAR  	=	')';
 TERMINATOR    = ';';
-STAR  = '*';
 EQUALS = '=';
 }
 
@@ -57,6 +56,8 @@ DISTINCT: 'distinct' | 'DISTINCT';
 ID  :	(('a'..'z'|'A'..'Z' | '_') ((DIGIT)*))+;
 
 QUOTE : '\'';
+
+STAR  : '*';
 
 INT :	'0'..'9'+
     ;
