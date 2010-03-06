@@ -50,8 +50,16 @@ def exec_query(db, query):
   else:
     print "[*] Transaction complete: ",query
     
+def node_id(db,nodeid):
+  try:    
+    sql = "SELECT nodeurl from dtables where nodeid = "+nodeid+ ";"
+    stmt = ibm_db.exec_immediate(conn,sql)
+    dictionary = ibm_db.fetch_assoc(stmt)
+    while dictionary != False:
+      url = dictionary["nodeurl"]
+      return url
+  except:
     
-
 # check to see if dtables in CATALOG exists, if not, create it
 def create_catalog(cat, catalog):
   try:
@@ -143,11 +151,10 @@ def loadCSV(filename):
   contents = []
   for line in open(filename):
     fields = line.split(',');
-    number = fields[0]
-    title = fields[1]
-    author = fields[2]
-    book = (number,title,author)
-    contents.append(book)
+    info = fields[0]
+    age = fields[1]
+    item = (info,age)
+    contents.append(item)
   return contents
 
 # parse to obtain tablename

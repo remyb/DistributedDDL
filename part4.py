@@ -12,32 +12,35 @@ if len(sys.argv) is not 3:
 csv_contents = loadCSV(sys.argv[2])
 
 # Get Catalog and Parition Sections
-configuration = ConfigExtractor(sys.argv[1])
-catalog = configuration.getSection('catalog')
-partition = configuration.getSection('partition')
+catalog = config_extract(sys.argv[1], 'catalog')
+partition = config_extract(sys.argv[1], 'partition')
 
 # Get Node partition information if range is specified
 if(partition['method']=="range"):
-  part_info1 = configuration.getSection('node1')
-  part_info2 = configuration.getSection('node2')
+  part_info1 = config_extract(sys.argv[1], 'node1')
+  part_info2 = config_extract(sys.argv[1], 'node2')
 
 # Make persistant catalog connection
 conn = ibm_db.pconnect(catalog['hostname'], catalog['username'],catalog['passwd'])
 
 # Get a list of nodes that contain table name
-tablename = "BOOKST"
-nodes = get_nodes(conn, tablename)
-print "Number of Nodes: ",len(nodes)
+nodes = get_nodes(conn, partition['tablename'])
+print "[DEBUG] Number of Nodes: ",len(nodes)
 
 # Create a list of connected node objects
 connections = []
 for node in nodes:
   print node
-  connections.append(ibm_db.pconnect(node[0], node[1],node[2]))
+  connections.append(ibm_db.pconnect(node[1], node[2],node[3]))
+
+for connection in connections:
+  client_print(connection)
 
 method = partition['method'].lower()
 column = partition['column'].lower()
 partmtd = ('notpartition', 'range', 'hash')
+
+print "***************",node_id(connections[0], 1)
 
 if method == partmtd[0]:
   # place all rows in all database tables
@@ -46,23 +49,16 @@ elif method == partmtd[1]:
   print "ranger rick"
   column = partition['column']
   for row in csv_contents:
-    if column == 'isbn':
-      if row[0] > part_info1["node1.param1"] and row[0] <= part_info1["node1.param2"]:
-        print row[0] + " in partition 1"
-      elif row[0] > part_info2["node2.param1"] and row[0] <= part_info2["node2.param2"]:
-        print row[0] + " in partition 2"   
-    elif column == 'title':
+    if column == 'age':
       if row[1] > part_info1["node1.param1"] and row[1] <= part_info1["node1.param2"]:
         print row[1] + " in partition 1"
+        #sql = "INSERT INTO " + 
+        exec_query(connections[0], query)
       elif row[1] > part_info2["node2.param1"] and row[1] <= part_info2["node2.param2"]:
-        print row[1] + " in partition 2"           
-    elif column == 'author':
-      if row[2] > part_info1["node1.param1"] and row[2] <= part_info1["node1.param2"]:
-        print row[2] + " in partition 1"
-      elif row[2] > part_info2["node2.param1"] and row[2] <= part_info2["node2.param2"]:
-        print row[2] + " in partition 2"      
-elif method == partmtd[2]:
-  print "hash method"
+        print row[1] + " in partition 2"  
+        exec_query(connections[1], query) 
+    elif method == partmtd[2]:
+      print "hash method"
   for row in csv_contents:
     nodenum = (int(row[0])%int(partition["param1"]))+1 
     print nodenum
@@ -72,6 +68,8 @@ elif method == partmtd[2]:
       print row[0] + " in partition 2"
 else:
   print "failbot", method, partmtd[1]
+  exec_query(connections[0], query)
+  exec_query(connections[1], query)
 
 
 

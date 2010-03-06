@@ -3,7 +3,7 @@ catalog.hostname=CATALOG
 catalog.username=db2inst1
 catalog.passwd=ics421ass1
 
-tablename=books
+tablename=age
 partition.method=hash
 partition.column=isbn
 partition.param1=2
